@@ -1,5 +1,9 @@
 language: python
 
+sudo: required
+services:
+  - docker
+
 cache:
   directories:
     - $HOME/.cache/pip
