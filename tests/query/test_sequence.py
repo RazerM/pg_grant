@@ -1,0 +1,49 @@
+import pytest
+
+from pg_grant.query import get_all_sequence_acls, get_sequence_acls
+
+
+expected_acls = {
+    'public': {
+        # seq1 has default privileges, so None is returned.
+        'seq1': None,
+        # alice is owner, bob was granted all
+        'seq2': ['alice=rwU/alice', 'bob=rwU/alice'],
+    },
+    'schema1': {
+        'seq3': None,
+    }
+}
+
+
+@pytest.mark.parametrize('name, acls', expected_acls['public'].items())
+def test_get_sequence_acls_visible(connection, name, acls):
+    """Find visible (i.e. in search path) sequences matching ``name``."""
+    sequence = get_sequence_acls(connection, name)
+    assert sequence.acl == acls
+
+
+@pytest.mark.parametrize('schema, name, acls', [
+    (schema, seq, acl)
+    for schema, d in expected_acls.items()
+    for seq, acl in d.items()
+])
+def test_get_sequence_acls_schema(connection, schema, name, acls):
+    """Find sequences  from ``schema`` matching ``name``."""
+    sequence = get_sequence_acls(connection, name, schema)
+    assert sequence.acl == acls
+
+
+def test_get_all_sequence_acls(connection):
+    """Get all sequences in all schemas."""
+    sequences = get_all_sequence_acls(connection)
+    assert {x.schema for x in sequences} == {'public', 'schema1'}
+
+    for sequence in sequences:
+        if sequence.schema not in expected_acls:
+            continue
+
+        if sequence.name not in expected_acls[sequence.schema]:
+            continue
+
+        assert sequence.acl == expected_acls[sequence.schema][sequence.name]
