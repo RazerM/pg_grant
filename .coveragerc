@@ -2,6 +2,7 @@
 branch=True
 source=
     pg_grant
+    tests
 
 [paths]
 source=
