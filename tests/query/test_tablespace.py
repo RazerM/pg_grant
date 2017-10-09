@@ -1,0 +1,29 @@
+import pytest
+
+from pg_grant.query import get_all_tablespace_acls, get_tablespace_acls
+
+
+expected_acls = {
+    # pg_default has default privileges, so None is returned.
+    'pg_default': None,
+    # postgres is owner, alice was granted CONNECT
+    'pg_global': ['postgres=C/postgres', 'alice=C/postgres'],
+}
+
+
+@pytest.mark.parametrize('name, acls', expected_acls.items())
+def test_get_tablespace_acls(connection, name, acls):
+    """Find visible tablespaces matching ``name``."""
+    tablespace = get_tablespace_acls(connection, name)
+    assert tablespace.acl == acls
+
+
+def test_get_all_tablespace_acls(connection):
+    """Get all tablespaces in all tablespaces."""
+    tablespaces = get_all_tablespace_acls(connection)
+
+    for tablespace in tablespaces:
+        if tablespace.name not in expected_acls:
+            continue
+
+        assert tablespace.acl == expected_acls[tablespace.name]
