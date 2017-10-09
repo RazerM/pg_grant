@@ -494,3 +494,5 @@ def test_parse_unknown_type():
     with pytest.raises(ValueError) as exc_info:
         # noinspection PyTypeChecker
         parse_acl_item('bob=a/alice', 'bad type')
+
+    assert 'Unknown type' in exc_info.value.args[0]
