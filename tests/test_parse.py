@@ -471,3 +471,26 @@ def test_parse_lob_data(acl, grantee, grantor, privs, privswgo):
 def test_parse_col_data(acl, grantee, grantor, privs, privswgo):
     parsed = parse_acl_item(acl, ObjectType.TABLE, 'id')
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
+
+
+@pytest.mark.parametrize('acl', [
+    '"bob=a/alice',
+    'bo"b=a/alice',
+    '"bob""=a/alice',
+    '"=a/alice',
+    'bob=a/"alice',
+    'bob=a/al"ice',
+    'bob=a/"alice""',
+    'bob=a/"',
+])
+def test_parse_invalid_quote(acl):
+    with pytest.raises(ValueError) as exc_info:
+        parse_acl_item(acl)
+
+    assert 'quote' in exc_info.value.args[0]
+
+
+def test_parse_unknown_type():
+    with pytest.raises(ValueError) as exc_info:
+        # noinspection PyTypeChecker
+        parse_acl_item('bob=a/alice', 'bad type')

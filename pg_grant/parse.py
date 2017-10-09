@@ -16,7 +16,7 @@ def _get_acl_username(acl):
             i += 1
 
             if i == len(acl):
-                raise ValueError('ACL syntax error')
+                raise ValueError('ACL syntax error: unterminated quote.')
 
             # Loop until we come across an unescaped quote
             while not (acl[i] == '"' and acl[i + 1:i + 2] != '"'):
@@ -26,6 +26,9 @@ def _get_acl_username(acl):
 
                 output += acl[i]
                 i += 1
+
+                if i == len(acl):
+                    raise ValueError('ACL syntax error: unterminated quote.')
 
             i += 1
 
