@@ -343,6 +343,39 @@ parse_lob_data = [
     ('bob=T*/alice', 'bob', 'alice', [], []),
 ]
 
+parse_col_data = [
+    ('alice=rwax/alice', 'alice', 'alice', ['ALL (id)'], []),
+    ('alice=r*w*a*x*/alice', 'alice', 'alice', [], ['ALL (id)']),
+    ('bob=rwax/alice', 'bob', 'alice', ['ALL (id)'], []),
+    ('bob=rwa/alice', 'bob', 'alice', ['SELECT (id)', 'UPDATE (id)', 'INSERT (id)'], []),
+
+    ('bob=a/alice', 'bob', 'alice', ['INSERT (id)'], []),
+    ('bob=r/alice', 'bob', 'alice', ['SELECT (id)'], []),
+    ('bob=w/alice', 'bob', 'alice', ['UPDATE (id)'], []),
+    ('bob=d/alice', 'bob', 'alice', [], []),
+    ('bob=D/alice', 'bob', 'alice', [], []),
+    ('bob=x/alice', 'bob', 'alice', ['REFERENCES (id)'], []),
+    ('bob=t/alice', 'bob', 'alice', [], []),
+    ('bob=X/alice', 'bob', 'alice', [], []),
+    ('bob=U/alice', 'bob', 'alice', [], []),
+    ('bob=C/alice', 'bob', 'alice', [], []),
+    ('bob=c/alice', 'bob', 'alice', [], []),
+    ('bob=T/alice', 'bob', 'alice', [], []),
+
+    ('bob=a*/alice', 'bob', 'alice', [], ['INSERT (id)']),
+    ('bob=r*/alice', 'bob', 'alice', [], ['SELECT (id)']),
+    ('bob=w*/alice', 'bob', 'alice', [], ['UPDATE (id)']),
+    ('bob=d*/alice', 'bob', 'alice', [], []),
+    ('bob=D*/alice', 'bob', 'alice', [], []),
+    ('bob=x*/alice', 'bob', 'alice', [], ['REFERENCES (id)']),
+    ('bob=t*/alice', 'bob', 'alice', [], []),
+    ('bob=X*/alice', 'bob', 'alice', [], []),
+    ('bob=U*/alice', 'bob', 'alice', [], []),
+    ('bob=C*/alice', 'bob', 'alice', [], []),
+    ('bob=c*/alice', 'bob', 'alice', [], []),
+    ('bob=T*/alice', 'bob', 'alice', [], []),
+]
+
 
 @pytest.mark.parametrize('acl, grantee, grantor, privs, privswgo', parse_data)
 def test_parse(acl, grantee, grantor, privs, privswgo):
@@ -430,4 +463,11 @@ def test_parse_foreign_table_data(acl, grantee, grantor, privs, privswgo):
     'acl, grantee, grantor, privs, privswgo', parse_lob_data)
 def test_parse_lob_data(acl, grantee, grantor, privs, privswgo):
     parsed = parse_acl_item(acl, ObjectType.LARGE_OBJECT)
+    assert parsed == Privileges(grantee, grantor, privs, privswgo)
+
+
+@pytest.mark.parametrize(
+    'acl, grantee, grantor, privs, privswgo', parse_col_data)
+def test_parse_col_data(acl, grantee, grantor, privs, privswgo):
+    parsed = parse_acl_item(acl, ObjectType.TABLE, 'id')
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
