@@ -150,7 +150,7 @@ _pg_lang_stmt = (
         cast(pg_language.c.lanacl, ARRAY(Text)).label('acl'),
     ])
     .select_from(
-        pg_proc
+        pg_language
         .outerjoin(pg_roles, pg_language.c.lanowner == pg_roles.c.oid)
     )
 )
@@ -296,11 +296,11 @@ def get_language_acls(conn, language):
 
 
 def get_all_schema_acls(conn):
-    return conn.execute(_pg_lang_stmt).fetchall()
+    return conn.execute(_pg_schema_stmt).fetchall()
 
 
 def get_schema_acls(conn, schema):
-    stmt = _pg_lang_stmt.where(pg_namespace.c.lanname == schema)
+    stmt = _pg_schema_stmt.where(pg_namespace.c.nspname == schema)
     return conn.execute(stmt).fetchone()
 
 
