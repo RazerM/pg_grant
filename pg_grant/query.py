@@ -235,7 +235,8 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
     stmt = _pg_proc_stmt
 
     if (function_name is None) != (arg_types is None):
-        raise TypeError('function_name and arg_types must both be specified')
+        raise TypeError(
+            'function_name and arg_types must both be specified')  # pragma: no cover
 
     if schema is not None:
         stmt = stmt.where(pg_namespace.c.nspname == schema)
