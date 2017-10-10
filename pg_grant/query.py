@@ -2,6 +2,7 @@ from enum import Enum
 
 from sqlalchemy import (
     ARRAY, MetaData, Text, cast, column, func, select, table, text)
+from sqlalchemy.dialects.postgresql import array
 
 __all__ = (
     'get_all_table_acls',
@@ -9,6 +10,7 @@ __all__ = (
     'get_all_sequence_acls',
     'get_sequence_acls',
     'get_all_function_acls',
+    'get_function_acls',
     'get_all_language_acls',
     'get_language_acls',
     'get_all_schema_acls',
@@ -119,19 +121,21 @@ _pg_class_stmt = (
     )
 )
 
+_pg_proc_argtypes = (
+    select([array_agg(pg_type.c.typname)])
+    .select_from(
+        unnest(pg_proc.c.proargtypes).alias('upat')
+        .join(pg_type, text('upat') == pg_type.c.oid)
+    )
+    .as_scalar()
+)
+
 _pg_proc_stmt = (
     select([
         pg_proc.c.oid,
+        pg_namespace.c.nspname.label('schema'),
         pg_proc.c.proname.label('name'),
-        (
-            select([array_agg(pg_type.c.typname)])
-            .select_from(
-                unnest(pg_proc.c.proargtypes).alias('upat')
-                .join(pg_type, text('upat') == pg_type.c.oid)
-            )
-            .as_scalar()
-            .label('argtypes')
-        ),
+        _pg_proc_argtypes.label('argtypes'),
         pg_roles.c.rolname.label('owner'),
         cast(pg_proc.c.proacl, ARRAY(Text)).label('acl'),
     ])
@@ -197,6 +201,7 @@ _pg_tablespace_stmt = (
 _pg_type_stmt = (
     select([
         pg_type.c.oid,
+        pg_namespace.c.nspname.label('schema'),
         pg_type.c.typname.label('name'),
         pg_roles.c.rolname.label('owner'),
         cast(pg_type.c.typacl, ARRAY(Text)).label('acl'),
@@ -226,12 +231,20 @@ def _filter_pg_class_stmt(schema=None, rel_name=None):
     return stmt
 
 
-def _filter_pg_proc_stmt(schema=None):
-    # TODO: name + args
+def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
     stmt = _pg_proc_stmt
+
+    if (function_name is None) != (arg_types is None):
+        raise TypeError('function_name and arg_types must both be specified')
 
     if schema is not None:
         stmt = stmt.where(pg_namespace.c.nspname == schema)
+
+    if function_name is not None:
+        if schema is None:
+            stmt = stmt.where(pg_function_is_visible(pg_proc.c.oid))
+        stmt = stmt.where(pg_proc.c.proname == function_name)
+        stmt = stmt.where(cast(_pg_proc_argtypes, ARRAY(Text)) == array(arg_types))
 
     return stmt
 
@@ -284,6 +297,11 @@ def get_sequence_acls(conn, sequence, schema=None):
 def get_all_function_acls(conn, schema=None):
     stmt = _filter_pg_proc_stmt(schema=schema)
     return conn.execute(stmt).fetchall()
+
+
+def get_function_acls(conn, function_name, arg_types, schema=None):
+    stmt = _filter_pg_proc_stmt(schema, function_name, arg_types)
+    return conn.execute(stmt).fetchone()
 
 
 def get_all_language_acls(conn):
