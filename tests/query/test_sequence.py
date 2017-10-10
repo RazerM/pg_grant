@@ -39,6 +39,8 @@ def test_get_all_sequence_acls(connection):
     sequences = get_all_sequence_acls(connection)
     assert {x.schema for x in sequences} == {'public', 'schema1'}
 
+    tested = 0
+
     for sequence in sequences:
         if sequence.schema not in expected_acls:
             continue
@@ -47,3 +49,6 @@ def test_get_all_sequence_acls(connection):
             continue
 
         assert sequence.acl == expected_acls[sequence.schema][sequence.name]
+        tested += 1
+
+    assert tested == sum(len(v) for v in expected_acls.values())

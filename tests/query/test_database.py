@@ -23,8 +23,13 @@ def test_get_all_database_acls(connection):
     """Get all databases in all databases."""
     databases = get_all_database_acls(connection)
 
+    tested = 0
+
     for database in databases:
         if database.name not in expected_acls:
             continue
 
         assert database.acl == expected_acls[database.name]
+        tested += 1
+
+    assert tested == len(expected_acls)

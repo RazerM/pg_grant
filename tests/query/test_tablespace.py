@@ -22,8 +22,13 @@ def test_get_all_tablespace_acls(connection):
     """Get all tablespaces in all tablespaces."""
     tablespaces = get_all_tablespace_acls(connection)
 
+    tested = 0
+
     for tablespace in tablespaces:
         if tablespace.name not in expected_acls:
             continue
 
         assert tablespace.acl == expected_acls[tablespace.name]
+        tested += 1
+
+    assert tested == len(expected_acls)

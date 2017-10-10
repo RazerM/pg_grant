@@ -37,6 +37,8 @@ def test_get_all_table_acls(connection):
     schemas = {x.schema for x in tables}
     assert schemas == {'public', 'information_schema', 'pg_catalog'}
 
+    tested = 0
+
     for table in tables:
         if table.schema not in expected_acls:
             continue
@@ -45,3 +47,6 @@ def test_get_all_table_acls(connection):
             continue
 
         assert table.acl == expected_acls[table.schema][table.name]
+        tested += 1
+
+    assert tested == sum(len(v) for v in expected_acls.values())

@@ -22,8 +22,13 @@ def test_get_all_language_acls(connection):
     """Get all languages in all schemas."""
     languages = get_all_language_acls(connection)
 
+    tested = 0
+
     for language in languages:
         if language.name not in expected_acls:
             continue
 
         assert language.acl == expected_acls[language.name]
+        tested += 1
+
+    assert tested == len(expected_acls)

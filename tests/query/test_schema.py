@@ -22,8 +22,13 @@ def test_get_all_schema_acls(connection):
     """Get all schemas in all schemas."""
     schemas = get_all_schema_acls(connection)
 
+    tested = 0
+
     for schema in schemas:
         if schema.name not in expected_acls:
             continue
 
         assert schema.acl == expected_acls[schema.name]
+        tested += 1
+
+    assert tested == len(expected_acls)
