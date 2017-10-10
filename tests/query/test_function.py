@@ -93,3 +93,8 @@ def test_invalid_arg_types_parameter(arg_types):
 def test_valid_arg_types_parameter(connection, arg_types):
     with suppress(NoSuchObjectError):
         get_function_acls(connection, 'fun1', arg_types)
+
+
+def test_no_such_object(connection):
+    with pytest.raises(NoSuchObjectError):
+        get_function_acls(connection, 'fun2', [])

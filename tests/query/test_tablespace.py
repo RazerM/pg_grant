@@ -1,5 +1,6 @@
 import pytest
 
+from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_tablespace_acls, get_tablespace_acls
 
 
@@ -32,3 +33,8 @@ def test_get_all_tablespace_acls(connection):
         tested += 1
 
     assert tested == len(expected_acls)
+
+
+def test_no_such_object(connection):
+    with pytest.raises(NoSuchObjectError):
+        get_tablespace_acls(connection, 'eggs')

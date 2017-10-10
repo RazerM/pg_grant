@@ -1,5 +1,6 @@
 import pytest
 
+from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_sequence_acls, get_sequence_acls
 
 
@@ -52,3 +53,8 @@ def test_get_all_sequence_acls(connection):
         tested += 1
 
     assert tested == sum(len(v) for v in expected_acls.values())
+
+
+def test_no_such_object(connection):
+    with pytest.raises(NoSuchObjectError):
+        get_sequence_acls(connection, 'seq3')

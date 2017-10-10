@@ -1,5 +1,6 @@
 import pytest
 
+from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_table_acls, get_table_acls
 
 
@@ -50,3 +51,8 @@ def test_get_all_table_acls(connection):
         tested += 1
 
     assert tested == sum(len(v) for v in expected_acls.values())
+
+
+def test_no_such_object(connection):
+    with pytest.raises(NoSuchObjectError):
+        get_table_acls(connection, 'table3')
