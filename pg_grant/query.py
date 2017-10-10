@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from enum import Enum
 from typing import Sequence
 
