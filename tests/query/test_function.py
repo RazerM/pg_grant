@@ -54,3 +54,39 @@ def test_get_all_function_acls(connection):
         tested += 1
 
     assert tested == sum(len(v) for v in expected_acls.values())
+
+
+@pytest.mark.parametrize('function_name, arg_types', [
+    (None, ('int4',)),
+    ('fun1', None),
+    ('fun1', 'int4'),
+])
+def test_missing_args(function_name, arg_types):
+    with pytest.raises(TypeError) as exc_info:
+        get_function_acls(None, function_name, arg_types)
+
+    msg = 'function_name and arg_types must both be specified'
+    assert exc_info.value.args[0] == msg
+
+
+@pytest.mark.parametrize('arg_types', [
+    'a string',
+    dict(),
+    1
+])
+def test_invalid_arg_types_parameter(arg_types):
+    with pytest.raises(TypeError) as exc_info:
+        get_function_acls(None, 'fun1', arg_types)
+
+    msg = 'arg_types should be a sequence of strings'
+    assert msg in exc_info.value.args[0]
+
+
+@pytest.mark.parametrize('arg_types', [
+    (),
+    [],
+    ['int4'],
+    ('int4',),
+])
+def test_valid_arg_types_parameter(connection, arg_types):
+    get_function_acls(connection, 'fun1', arg_types)

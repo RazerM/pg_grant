@@ -1,4 +1,6 @@
+from collections.abc import Sequence
 from enum import Enum
+from typing import Sequence
 
 from sqlalchemy import (
     ARRAY, MetaData, Text, cast, column, func, select, table, text)
@@ -240,7 +242,10 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
         if schema is None:
             stmt = stmt.where(pg_function_is_visible(pg_proc.c.oid))
         stmt = stmt.where(pg_proc.c.proname == function_name)
-        stmt = stmt.where(cast(_pg_proc_argtypes, ARRAY(Text)) == array(arg_types))
+        stmt = stmt.where(
+            # have to cast RHS in case it's empty
+            cast(_pg_proc_argtypes, ARRAY(Text)) == cast(array(arg_types), ARRAY(Text))
+        )
 
     return stmt
 
@@ -295,7 +300,13 @@ def get_all_function_acls(conn, schema=None):
     return conn.execute(stmt).fetchall()
 
 
-def get_function_acls(conn, function_name, arg_types, schema=None):
+def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None):
+    if (function_name is None) != (arg_types is None):
+        raise TypeError('function_name and arg_types must both be specified')
+
+    if not isinstance(arg_types, Sequence) or isinstance(arg_types, str):
+        raise TypeError("arg_types should be a sequence of strings, e.g. ['int4']")
+
     stmt = _filter_pg_proc_stmt(schema, function_name, arg_types)
     return conn.execute(stmt).fetchone()
 
