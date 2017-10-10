@@ -59,7 +59,6 @@ def test_get_all_function_acls(connection):
 @pytest.mark.parametrize('function_name, arg_types', [
     (None, ('int4',)),
     ('fun1', None),
-    ('fun1', 'int4'),
 ])
 def test_missing_args(function_name, arg_types):
     with pytest.raises(TypeError) as exc_info:
