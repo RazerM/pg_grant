@@ -16,12 +16,14 @@ EMAIL = metadata['email']
 
 requires = {
     'attrs',
-    'sqlalchemy',
 }
 
 extras_require = {
     ':python_version<"3.5"': {
         'typing',
+    },
+    'query': {
+        'sqlalchemy',
     },
     'test': {
         'pytest>=3.0',
