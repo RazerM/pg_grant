@@ -3,7 +3,7 @@ from enum import Enum
 import attr
 
 
-class ObjectType(Enum):
+class PgObjectType(Enum):
     TABLE = 1
     SEQUENCE = 2
     FUNCTION = 3

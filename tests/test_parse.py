@@ -1,6 +1,6 @@
 import pytest
 
-from pg_grant import ObjectType, Privileges, parse_acl_item
+from pg_grant import PgObjectType, Privileges, parse_acl_item
 
 parse_data = [
     ('alice=arwdDxt/alice', 'alice', 'alice',
@@ -385,91 +385,91 @@ def test_parse(acl, grantee, grantor, privs, privswgo):
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_table_data)
 def test_parse_table(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.TABLE)
+    parsed = parse_acl_item(acl, PgObjectType.TABLE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_sequence_data)
 def test_parse_sequence(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.SEQUENCE)
+    parsed = parse_acl_item(acl, PgObjectType.SEQUENCE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_function_data)
 def test_parse_function(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.FUNCTION)
+    parsed = parse_acl_item(acl, PgObjectType.FUNCTION)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_language_data)
 def test_parse_language(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.LANGUAGE)
+    parsed = parse_acl_item(acl, PgObjectType.LANGUAGE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_schema_data)
 def test_parse_schema(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.SCHEMA)
+    parsed = parse_acl_item(acl, PgObjectType.SCHEMA)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_database_data)
 def test_parse_database(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.DATABASE)
+    parsed = parse_acl_item(acl, PgObjectType.DATABASE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_tablespace_data)
 def test_parse_tablespace(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.TABLESPACE)
+    parsed = parse_acl_item(acl, PgObjectType.TABLESPACE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_type_data)
 def test_parse_type(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.TYPE)
+    parsed = parse_acl_item(acl, PgObjectType.TYPE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_fdw_data)
 def test_parse_fdw(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.FOREIGN_DATA_WRAPPER)
+    parsed = parse_acl_item(acl, PgObjectType.FOREIGN_DATA_WRAPPER)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_foreign_server_data)
 def test_parse_foreign_server_data(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.FOREIGN_SERVER)
+    parsed = parse_acl_item(acl, PgObjectType.FOREIGN_SERVER)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_foreign_table_data)
 def test_parse_foreign_table_data(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.FOREIGN_TABLE)
+    parsed = parse_acl_item(acl, PgObjectType.FOREIGN_TABLE)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_lob_data)
 def test_parse_lob_data(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.LARGE_OBJECT)
+    parsed = parse_acl_item(acl, PgObjectType.LARGE_OBJECT)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 
 @pytest.mark.parametrize(
     'acl, grantee, grantor, privs, privswgo', parse_col_data)
 def test_parse_col_data(acl, grantee, grantor, privs, privswgo):
-    parsed = parse_acl_item(acl, ObjectType.TABLE, 'id')
+    parsed = parse_acl_item(acl, PgObjectType.TABLE, 'id')
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 

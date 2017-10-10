@@ -1,4 +1,4 @@
-from .types import Privileges, ObjectType
+from .types import Privileges, PgObjectType
 
 
 def _get_acl_username(acl):
@@ -35,7 +35,7 @@ def _get_acl_username(acl):
     return i, output
 
 
-def get_default_privileges(type: ObjectType, owner):
+def get_default_privileges(type: PgObjectType, owner):
     """Return a list of :class:`pg_grant.types.Privileges` objects matching the
     default privileges for that type.
 
@@ -56,11 +56,11 @@ def get_default_privileges(type: ObjectType, owner):
     # schemas or tablespaces. For other types, the default privileges granted
     # to PUBLIC are as follows: CONNECT and CREATE TEMP TABLE for databases;
     # EXECUTE privilege for functions; and USAGE privilege for languages."
-    if type is ObjectType.DATABASE:
+    if type is PgObjectType.DATABASE:
         public_privs = ['CONNECT', 'TEMPORARY']
-    elif type is ObjectType.FUNCTION:
+    elif type is PgObjectType.FUNCTION:
         public_privs = ['EXECUTE']
-    elif type is ObjectType.LANGUAGE:
+    elif type is PgObjectType.LANGUAGE:
         public_privs = ['USAGE']
 
     if public_privs:
@@ -70,7 +70,7 @@ def get_default_privileges(type: ObjectType, owner):
     return priv_list
 
 
-def parse_acl_item(acl, type: ObjectType = None, subname=None):
+def parse_acl_item(acl, type: PgObjectType = None, subname=None):
     """Port of parseAclItem from dumputils.c"""
     eq_pos, grantee = _get_acl_username(acl)
     assert acl[eq_pos] == '='
@@ -127,11 +127,11 @@ def parse_acl_item(acl, type: ObjectType = None, subname=None):
         # Don't think anything can have all of them, but set all to False
         # since we don't know type.
         all_with_grant_option = all_without_grant_option = False
-    elif type in {ObjectType.TABLE, ObjectType.SEQUENCE}:
+    elif type in {PgObjectType.TABLE, PgObjectType.SEQUENCE}:
         convert_priv('r', 'SELECT')
         convert_priv('w', 'UPDATE')
 
-        if type is ObjectType.SEQUENCE:
+        if type is PgObjectType.SEQUENCE:
             convert_priv('U', 'USAGE')
         else:
             convert_priv('a', 'INSERT')
@@ -142,28 +142,28 @@ def parse_acl_item(acl, type: ObjectType = None, subname=None):
                 convert_priv('t', 'TRIGGER')
                 convert_priv('D', 'TRUNCATE')
 
-    elif type is ObjectType.FUNCTION:
+    elif type is PgObjectType.FUNCTION:
         convert_priv('X', 'EXECUTE')
-    elif type is ObjectType.LANGUAGE:
+    elif type is PgObjectType.LANGUAGE:
         convert_priv('U', 'USAGE')
-    elif type is ObjectType.SCHEMA:
+    elif type is PgObjectType.SCHEMA:
         convert_priv('C', 'CREATE')
         convert_priv('U', 'USAGE')
-    elif type is ObjectType.DATABASE:
+    elif type is PgObjectType.DATABASE:
         convert_priv('C', 'CREATE')
         convert_priv('c', 'CONNECT')
         convert_priv('T', 'TEMPORARY')
-    elif type is ObjectType.TABLESPACE:
+    elif type is PgObjectType.TABLESPACE:
         convert_priv('C', 'CREATE')
-    elif type is ObjectType.TYPE:
+    elif type is PgObjectType.TYPE:
         convert_priv('U', 'USAGE')
-    elif type is ObjectType.FOREIGN_DATA_WRAPPER:
+    elif type is PgObjectType.FOREIGN_DATA_WRAPPER:
         convert_priv('U', 'USAGE')
-    elif type is ObjectType.FOREIGN_SERVER:
+    elif type is PgObjectType.FOREIGN_SERVER:
         convert_priv('U', 'USAGE')
-    elif type is ObjectType.FOREIGN_TABLE:
+    elif type is PgObjectType.FOREIGN_TABLE:
         convert_priv('r', 'SELECT')
-    elif type is ObjectType.LARGE_OBJECT:
+    elif type is PgObjectType.LARGE_OBJECT:
         convert_priv('r', 'SELECT')
         convert_priv('w', 'UPDATE')
     else:
