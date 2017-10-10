@@ -62,6 +62,11 @@ def get_default_privileges(type: PgObjectType, owner):
         public_privs = ['EXECUTE']
     elif type is PgObjectType.LANGUAGE:
         public_privs = ['USAGE']
+    elif type is PgObjectType.TYPE:
+        # Seems like there's a documentation bug, and that types get USAGE by
+        # default.
+        # https://stackoverflow.com/questions/46656644
+        public_privs = ['USAGE']
 
     if public_privs:
         priv_list.append(
