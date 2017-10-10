@@ -38,3 +38,8 @@ GRANT USAGE ON LANGUAGE plpgsql TO alice;
 GRANT CONNECT ON DATABASE db1 TO alice;
 
 GRANT CREATE ON TABLESPACE pg_global TO alice;
+
+CREATE TYPE bug_status AS ENUM ('new', 'open', 'closed');
+CREATE TYPE thing AS ENUM ('spam', 'eggs');
+
+GRANT USAGE ON TYPE thing TO bob;
