@@ -11,8 +11,9 @@ __author__ = 'Frazer McLean'
 __email__ = 'frazer@frazermclean.co.uk'
 
 __all__ = (
-    'get_default_privileges',
-    'parse_acl_item',
+    'NoSuchObjectError',
     'PgObjectType',
     'Privileges',
+    'get_default_privileges',
+    'parse_acl_item',
 )
