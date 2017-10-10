@@ -1,3 +1,4 @@
+from .exc import NoSuchObjectError
 from .parse import get_default_privileges, parse_acl_item
 from .types import PgObjectType, Privileges
 

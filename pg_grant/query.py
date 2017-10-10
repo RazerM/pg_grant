@@ -6,6 +6,8 @@ from sqlalchemy import (
     ARRAY, Text, cast, column, func, select, table, text)
 from sqlalchemy.dialects.postgresql import array
 
+from .exc import NoSuchObjectError
+
 __all__ = (
     'get_all_table_acls',
     'get_table_acls',
@@ -281,7 +283,10 @@ def get_all_table_acls(conn, schema=None):
 
 def get_table_acls(conn, table_name, schema=None):
     stmt = _table_stmt(schema=schema, table_name=table_name)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(table_name)
+    return row
 
 
 def get_all_sequence_acls(conn, schema=None):
@@ -291,7 +296,10 @@ def get_all_sequence_acls(conn, schema=None):
 
 def get_sequence_acls(conn, sequence, schema=None):
     stmt = _sequence_stmt(schema=schema, sequence_name=sequence)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(sequence)
+    return row
 
 
 def get_all_function_acls(conn, schema=None):
@@ -307,7 +315,10 @@ def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None
         raise TypeError("arg_types should be a sequence of strings, e.g. ['int4']")
 
     stmt = _filter_pg_proc_stmt(schema, function_name, arg_types)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(function_name)
+    return row
 
 
 def get_all_language_acls(conn):
@@ -316,7 +327,10 @@ def get_all_language_acls(conn):
 
 def get_language_acls(conn, language):
     stmt = _pg_lang_stmt.where(pg_language.c.lanname == language)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(language)
+    return row
 
 
 def get_all_schema_acls(conn):
@@ -325,7 +339,10 @@ def get_all_schema_acls(conn):
 
 def get_schema_acls(conn, schema):
     stmt = _pg_schema_stmt.where(pg_namespace.c.nspname == schema)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(schema)
+    return row
 
 
 def get_all_database_acls(conn):
@@ -334,7 +351,10 @@ def get_all_database_acls(conn):
 
 def get_database_acls(conn, database):
     stmt = _pg_db_stmt.where(pg_database.c.datname == database)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(database)
+    return row
 
 
 def get_all_tablespace_acls(conn):
@@ -343,7 +363,10 @@ def get_all_tablespace_acls(conn):
 
 def get_tablespace_acls(conn, tablespace):
     stmt = _pg_tablespace_stmt.where(pg_tablespace.c.spcname == tablespace)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(tablespace)
+    return row
 
 
 def get_all_type_acls(conn, schema=None):
@@ -353,4 +376,7 @@ def get_all_type_acls(conn, schema=None):
 
 def get_type_acls(conn, type_name, schema=None):
     stmt = _filter_pg_type_stmt(schema=schema, type_name=type_name)
-    return conn.execute(stmt).fetchone()
+    row = conn.execute(stmt).fetchone()
+    if row is None:
+        raise NoSuchObjectError(type_name)
+    return row

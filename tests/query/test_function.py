@@ -1,5 +1,8 @@
+from contextlib import suppress
+
 import pytest
 
+from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_function_acls, get_function_acls
 
 
@@ -88,4 +91,5 @@ def test_invalid_arg_types_parameter(arg_types):
     ('int4',),
 ])
 def test_valid_arg_types_parameter(connection, arg_types):
-    get_function_acls(connection, 'fun1', arg_types)
+    with suppress(NoSuchObjectError):
+        get_function_acls(connection, 'fun1', arg_types)
