@@ -35,10 +35,6 @@ class PgRelKind(Enum):
     SEQUENCE = 'S'
 
 
-metadata = MetaData()
-_did_autoload = False
-
-
 pg_class = table(
     'pg_class',
     column('oid'),
