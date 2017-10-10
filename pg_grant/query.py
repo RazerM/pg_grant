@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Sequence
 
 from sqlalchemy import (
-    ARRAY, MetaData, Text, cast, column, func, select, table, text)
+    ARRAY, Text, cast, column, func, select, table, text)
 from sqlalchemy.dialects.postgresql import array
 
 __all__ = (
@@ -286,7 +286,6 @@ def get_table_acls(conn, table_name, schema=None):
 
 def get_all_sequence_acls(conn, schema=None):
     stmt = _sequence_stmt(schema=schema)
-    print(stmt)
     return conn.execute(stmt).fetchall()
 
 
