@@ -20,6 +20,9 @@ requires = {
 }
 
 extras_require = {
+    ':python_version<"3.5"': {
+        'typing',
+    },
     'test': {
         'pytest>=3.0',
         'testcontainers',
