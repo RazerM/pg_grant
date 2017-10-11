@@ -2,7 +2,7 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import ClauseElement, Executable
 
-from pg_grant.types import Privileges, PgObjectType
+from pg_grant.types import PgObjectType
 
 
 def _as_table(element):
