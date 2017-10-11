@@ -5,6 +5,12 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 from pg_grant.types import PgObjectType
 
 
+__all__ = (
+    'Grant',
+    'Revoke',
+)
+
+
 def _as_table(element):
     """Allow a Table or ORM model to be used as a table name."""
     insp = inspect(element, raiseerr=False)
