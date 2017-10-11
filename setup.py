@@ -23,7 +23,7 @@ extras_require = {
         'typing',
     },
     'query': {
-        'sqlalchemy',
+        'sqlalchemy[postgresql]',
     },
     'test': {
         'pytest>=3.0',
