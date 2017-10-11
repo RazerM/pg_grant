@@ -26,12 +26,12 @@ def engine(postgres_url):
 
 
 @pytest.fixture(scope='session')
-def schema(engine):
+def pg_schema(engine):
     with test_schema_file.open() as fp:
         engine.execute(fp.read())
 
 
 @pytest.fixture
-def connection(engine, schema):
+def connection(engine, pg_schema):
     with engine.connect() as conn:
         yield conn
