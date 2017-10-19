@@ -22,6 +22,10 @@ def _as_table(element):
 
 
 class _GrantRevoke(Executable, ClauseElement):
+    _execution_options = Executable._execution_options.union({
+        'autocommit': True
+    })
+
     valid_privileges = {
         'SELECT',
         'UPDATE',
