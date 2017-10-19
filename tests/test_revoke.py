@@ -30,13 +30,16 @@ class ModelB(Base):
     id = Column(Integer, primary_key=True)
 
 
-@pytest.mark.parametrize('privs, compiled', [
-    (['ALL'], 'REVOKE ALL ON TABLE mytable FROM alice'),
-    (['SELECT'], 'REVOKE SELECT ON TABLE mytable FROM alice'),
-    (['SELECT', 'INSERT'], 'REVOKE SELECT, INSERT ON TABLE mytable FROM alice'),
+@pytest.mark.parametrize('privs, grantee, compiled', [
+    (['ALL'], 'alice', 'REVOKE ALL ON TABLE mytable FROM alice'),
+    (['ALL'], 'PUBLIC', 'REVOKE ALL ON TABLE mytable FROM PUBLIC'),
+    (['ALL'], 'public', 'REVOKE ALL ON TABLE mytable FROM public'),
+    (['ALL'], 'grant', 'REVOKE ALL ON TABLE mytable FROM "grant"'),
+    (['SELECT'], 'alice', 'REVOKE SELECT ON TABLE mytable FROM alice'),
+    (['SELECT', 'INSERT'], 'alice', 'REVOKE SELECT, INSERT ON TABLE mytable FROM alice'),
 ])
-def test_compile_revoke_table_privs(privs, compiled):
-    statement = Revoke(privs, PgObjectType.TABLE, 'mytable', 'alice')
+def test_compile_revoke_table_privs(privs, grantee, compiled):
+    statement = Revoke(privs, PgObjectType.TABLE, 'mytable', grantee)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 

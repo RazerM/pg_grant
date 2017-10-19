@@ -30,13 +30,16 @@ class ModelB(Base):
     id = Column(Integer, primary_key=True)
 
 
-@pytest.mark.parametrize('privs, compiled', [
-    (['ALL'], 'GRANT ALL ON TABLE mytable TO alice'),
-    (['SELECT'], 'GRANT SELECT ON TABLE mytable TO alice'),
-    (['SELECT', 'INSERT'], 'GRANT SELECT, INSERT ON TABLE mytable TO alice'),
+@pytest.mark.parametrize('privs, grantee, compiled', [
+    (['ALL'], 'alice', 'GRANT ALL ON TABLE mytable TO alice'),
+    (['ALL'], 'PUBLIC', 'GRANT ALL ON TABLE mytable TO PUBLIC'),
+    (['ALL'], 'public', 'GRANT ALL ON TABLE mytable TO public'),
+    (['ALL'], 'grant', 'GRANT ALL ON TABLE mytable TO "grant"'),
+    (['SELECT'], 'alice', 'GRANT SELECT ON TABLE mytable TO alice'),
+    (['SELECT', 'INSERT'], 'alice', 'GRANT SELECT, INSERT ON TABLE mytable TO alice'),
 ])
-def test_compile_grant_table_privs(privs, compiled):
-    statement = Grant(privs, PgObjectType.TABLE, 'mytable', 'alice')
+def test_compile_grant_table_privs(privs, grantee, compiled):
+    statement = Grant(privs, PgObjectType.TABLE, 'mytable', grantee)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
