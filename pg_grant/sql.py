@@ -128,6 +128,11 @@ def pg_grant(element, compiler, **kw):
 
     is_grant = element.keyword == 'GRANT'
 
+    grantee = element.grantee
+
+    if grantee != 'PUBLIC':
+        grantee = compiler.preparer.quote(element.grantee)
+
     return '{}{} {} ON {} {} {} {}{}'.format(
         element.keyword,
         ' GRANT OPTION FOR' if element.grant_option and not is_grant else '',
@@ -135,6 +140,6 @@ def pg_grant(element, compiler, **kw):
         priv_type.value,
         target,
         'TO' if is_grant else 'FROM',
-        compiler.preparer.quote(element.grantee),
+        grantee,
         ' WITH GRANT OPTION' if element.grant_option and is_grant else '',
     )
