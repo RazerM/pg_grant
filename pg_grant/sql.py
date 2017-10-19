@@ -68,7 +68,7 @@ class Revoke(_GrantRevoke):
     keyword = 'REVOKE'
 
 
-@compiles(_GrantRevoke, 'postgresql')
+@compiles(_GrantRevoke)
 def pg_grant(element, compiler, **kw):
     priv = ', '.join(element.privileges)
 
