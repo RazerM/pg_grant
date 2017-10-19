@@ -130,7 +130,7 @@ def pg_grant(element, compiler, **kw):
 
     grantee = element.grantee
 
-    if grantee != 'PUBLIC':
+    if grantee.upper() != 'PUBLIC':
         grantee = compiler.preparer.quote(element.grantee)
 
     return '{}{} {} ON {} {} {} {}{}'.format(
