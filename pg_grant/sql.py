@@ -112,6 +112,10 @@ def pg_grant(element, compiler, **kw):
         if str_target is None:
             target = compiler.process(target)
         else:
+            if arg_types is None:
+                raise ValueError('Must use an empty sequence if function has '
+                                 'no arguments, not None.')
+
             str_arg_types = ', '.join([preparer.quote(t) for t in arg_types])
             target = '{}({})'.format(str_target, str_arg_types)
     elif isinstance(priv_type, PgObjectType):
