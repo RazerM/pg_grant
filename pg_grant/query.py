@@ -134,7 +134,7 @@ _pg_proc_stmt = (
         pg_proc.c.oid,
         pg_namespace.c.nspname.label('schema'),
         pg_proc.c.proname.label('name'),
-        _pg_proc_argtypes.label('argtypes'),
+        _pg_proc_argtypes.label('arg_types'),
         pg_roles.c.rolname.label('owner'),
         cast(pg_proc.c.proacl, ARRAY(Text)).label('acl'),
     ])

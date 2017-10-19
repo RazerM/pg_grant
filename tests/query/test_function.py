@@ -47,7 +47,7 @@ def test_get_all_function_acls(connection):
         if function.schema not in expected_acls:
             continue
 
-        key = (function.name, tuple(function.argtypes))
+        key = (function.name, tuple(function.arg_types))
         print(key)
 
         if key not in expected_acls[function.schema]:
