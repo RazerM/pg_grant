@@ -28,6 +28,7 @@ extras_require = {
     'test': {
         'pytest>=3.0',
         'testcontainers',
+        'testing.postgresql',
     },
     'docstest': {
         'doc8',

@@ -1,23 +1,53 @@
 from pathlib import Path
 
 import pytest
+import testing.postgresql
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import make_url
 from testcontainers import PostgresContainer as _PostgresContainer
 
 tests_dir = Path(__file__).parents[0].resolve()
 test_schema_file = Path(tests_dir, 'data', 'test-schema.sql')
 
+SUPERUSER_NAME = 'alice'
+DB_NAME = 'db1'
+
+
+Postgresql = testing.postgresql.PostgresqlFactory(
+    initdb_args='-U postgres -A trust',
+    database=DB_NAME,
+)
+
 
 class PostgresContainer(_PostgresContainer):
-    POSTGRES_USER = 'alice'
-    POSTGRES_DB = 'db1'
+    POSTGRES_USER = SUPERUSER_NAME
+    POSTGRES_DB = DB_NAME
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--no-container', action='store_true',
+        help='Use temporary PostgreSQL cluster without a container.')
 
 
 @pytest.fixture(scope='session')
-def postgres_url():
-    postgres_container = PostgresContainer("postgres:latest")
-    with postgres_container as postgres:
-        yield postgres.get_connection_url()
+def postgres_url(request):
+    no_container = request.config.getoption("--no-container")
+    if no_container:
+        postgresql = Postgresql()
+
+        # Use superuser to create new superuser, then yield new connection URL
+        url = make_url(postgresql.url())
+        engine = create_engine(url)
+        engine.execute('CREATE ROLE {} WITH SUPERUSER LOGIN'.format(SUPERUSER_NAME))
+        engine.dispose()
+        url.username = SUPERUSER_NAME
+
+        yield str(url)
+    else:
+        postgres_container = PostgresContainer("postgres:latest")
+        with postgres_container as postgres:
+            yield postgres.get_connection_url()
 
 
 @pytest.fixture(scope='session')
