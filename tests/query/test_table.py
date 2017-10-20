@@ -9,7 +9,7 @@ expected_acls = {
         # table1 has default privileges, so None is returned.
         'table1': None,
         # alice is owner, bob was granted all
-        'table2': ['alice=arwdDxt/alice', 'bob=arwdDxt/alice'],
+        'table2': ['bob=ar*wdDxt/alice', 'alice=arwdDxt/alice'],
     },
 }
 
