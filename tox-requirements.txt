@@ -1,0 +1,1 @@
+git+https://github.com/RazerM/testing.postgresql@a1c93c27f920c418b5946b106b47b880a382f7db#egg=testing.postgresql
