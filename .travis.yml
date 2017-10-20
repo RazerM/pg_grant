@@ -16,6 +16,9 @@ matrix:
     - python: 3.6
       env: TOXENV=py36
     - python: 3.6
+      addons:
+        postgresql: 9.4
+    - python: 3.6
       env: TOXENV=pep8
 #    - python: 3.6
 #      env: TOXENV=docs
@@ -35,7 +38,7 @@ install:
 
 script:
   - source ~/.venv/bin/activate
-  - tox
+  - .travis/run_tests.sh
 
 after_success:
   - ./.travis/upload_coverage.sh
