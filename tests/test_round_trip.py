@@ -7,18 +7,12 @@ from pg_grant import parse_acl_item, PgObjectType
 from pg_grant.query import (
     get_all_function_acls, get_all_sequence_acls, get_all_table_acls,
     get_all_type_acls)
-from pg_grant.sql import Grant, Revoke
 
 
 pytestmark = pytest.mark.nocontainer
 
 
 def _priv_acls(conn, acls, type_, revoke):
-    if revoke:
-        cls = Revoke
-    else:
-        cls = Grant
-
     for obj in acls:
         arg_types = None
         if 'arg_types' in obj.keys():
@@ -27,10 +21,16 @@ def _priv_acls(conn, acls, type_, revoke):
         if obj.acl is not None:
             for acl in obj.acl:
                 parsed = parse_acl_item(acl)
-                stmt = cls(
-                    parsed.privs, type_, obj.name, parsed.grantee,
-                    schema=obj.schema, arg_types=arg_types)
-                conn.execute(stmt)
+
+                if revoke:
+                    statements = parsed.as_revoke_statements(
+                        type_, obj.name, schema=obj.schema, arg_types=arg_types)
+                else:
+                    statements = parsed.as_grant_statements(
+                        type_, obj.name, schema=obj.schema, arg_types=arg_types)
+
+                for stmt in statements:
+                    conn.execute(stmt)
 
 
 grant_table_acls = partial(_priv_acls, type_=PgObjectType.TABLE, revoke=False)
