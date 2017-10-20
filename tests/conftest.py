@@ -30,6 +30,11 @@ def pytest_addoption(parser):
         help='Use temporary PostgreSQL cluster without a container.')
 
 
+def pytest_runtest_setup(item):
+    if 'nocontainer' in item.keywords and not item.config.getoption('--no-container'):
+        pytest.skip('Use --no-container to execute this test.')
+
+
 @pytest.fixture(scope='session')
 def postgres_url(request):
     no_container = request.config.getoption("--no-container")

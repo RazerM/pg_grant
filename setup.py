@@ -26,6 +26,7 @@ extras_require = {
         'sqlalchemy[postgresql]',
     },
     'test': {
+        'plumbum',
         'pytest>=3.0',
         'testcontainers',
         'testing.postgresql',
