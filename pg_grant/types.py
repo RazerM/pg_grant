@@ -26,32 +26,32 @@ class Privileges:
     privswgo = attr.ib(default=attr.Factory(list))
 
     def as_grant_statements(self, type_: PgObjectType, target, **kwargs):
-        from .sql import Grant
+        from .sql import grant
 
         statements = []
 
         if self.privs:
             statements.append(
-                Grant(self.privs, type_, target, self.grantee, **kwargs))
+                grant(self.privs, type_, target, self.grantee, **kwargs))
 
         if self.privswgo:
-            statements.append(Grant(
+            statements.append(grant(
                 self.privswgo, type_, target, self.grantee, grant_option=True,
                 **kwargs))
 
         return statements
 
     def as_revoke_statements(self, type_: PgObjectType, target, **kwargs):
-        from .sql import Revoke
+        from .sql import revoke
 
         statements = []
 
         if self.privs:
             statements.append(
-                Revoke(self.privs, type_, target, self.grantee, **kwargs))
+                revoke(self.privs, type_, target, self.grantee, **kwargs))
 
         if self.privswgo:
-            statements.append(Revoke(
+            statements.append(revoke(
                 self.privswgo, type_, target, self.grantee, grant_option=True,
                 **kwargs))
 

@@ -4,10 +4,9 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 
 from pg_grant.types import PgObjectType
 
-
 __all__ = (
-    'Grant',
-    'Revoke',
+    'grant',
+    'revoke',
 )
 
 
@@ -60,11 +59,11 @@ class _GrantRevoke(Executable, ClauseElement):
         self.arg_types = arg_types
 
 
-class Grant(_GrantRevoke):
+class _Grant(_GrantRevoke):
     keyword = 'GRANT'
 
 
-class Revoke(_GrantRevoke):
+class _Revoke(_GrantRevoke):
     keyword = 'REVOKE'
 
 
@@ -143,3 +142,17 @@ def pg_grant(element, compiler, **kw):
         grantee,
         ' WITH GRANT OPTION' if element.grant_option and is_grant else '',
     )
+
+
+def grant(privileges, type: PgObjectType, target, grantee, grant_option=False,
+          schema=None, arg_types=None):
+    return _Grant(
+        privileges, type, target, grantee, grant_option=grant_option,
+        schema=schema, arg_types=arg_types)
+
+
+def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
+           schema=None, arg_types=None):
+    return _Revoke(
+        privileges, type, target, grantee, grant_option=grant_option,
+        schema=schema, arg_types=arg_types)

@@ -4,7 +4,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 
 from pg_grant import PgObjectType
-from pg_grant.sql import Revoke
+from pg_grant.sql import revoke
 
 meta = MetaData()
 Base = declarative_base()
@@ -39,7 +39,7 @@ class ModelB(Base):
     (['SELECT', 'INSERT'], 'alice', 'REVOKE SELECT, INSERT ON TABLE mytable FROM alice'),
 ])
 def test_compile_revoke_table_privs(privs, grantee, compiled):
-    statement = Revoke(privs, PgObjectType.TABLE, 'mytable', grantee)
+    statement = revoke(privs, PgObjectType.TABLE, 'mytable', grantee)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -57,7 +57,7 @@ def test_compile_revoke_table_privs(privs, grantee, compiled):
     (ModelB, None, 'REVOKE ALL ON TABLE s.users FROM alice'),
 ])
 def test_compile_revoke_table_target(target, schema, compiled):
-    statement = Revoke(['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
+    statement = revoke(['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -66,7 +66,7 @@ def test_compile_revoke_table_target(target, schema, compiled):
     (False, 'REVOKE ALL ON TABLE t FROM alice'),
 ])
 def test_compile_revoke_table_revoke_option(revoke_option, compiled):
-    statement = Revoke(['ALL'], PgObjectType.TABLE, 't', 'alice', revoke_option)
+    statement = revoke(['ALL'], PgObjectType.TABLE, 't', 'alice', revoke_option)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -80,7 +80,7 @@ def test_compile_revoke_table_revoke_option(revoke_option, compiled):
     (seq_schema, None, 'REVOKE ALL ON SEQUENCE s.user_id FROM alice'),
 ])
 def test_compile_revoke_sequence_target(target, schema, compiled):
-    statement = Revoke(['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
+    statement = revoke(['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -91,7 +91,7 @@ def test_compile_revoke_sequence_target(target, schema, compiled):
     ('t', 'user', 'REVOKE ALL ON TYPE "user".t FROM alice'),
 ])
 def test_compile_revoke_type_target(target, schema, compiled):
-    statement = Revoke(['ALL'], PgObjectType.TYPE, target, 'alice', schema=schema)
+    statement = revoke(['ALL'], PgObjectType.TYPE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -105,7 +105,7 @@ def test_compile_revoke_type_target(target, schema, compiled):
      'REVOKE ALL ON FUNCTION "user"(text, integer) FROM alice'),
 ])
 def test_compile_revoke_function_target(target, arg_types, schema, compiled):
-    statement = Revoke(
+    statement = revoke(
         ['ALL'], PgObjectType.FUNCTION, target, 'alice', schema=schema,
         arg_types=arg_types)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
@@ -122,7 +122,7 @@ def test_compile_revoke_function_target(target, arg_types, schema, compiled):
     (PgObjectType.TABLESPACE, 'user', 'REVOKE ALL ON TABLESPACE "user" FROM alice'),
 ])
 def test_compile_revoke_other_target(type, target, compiled):
-    statement = Revoke(['ALL'], type, target, 'alice')
+    statement = revoke(['ALL'], type, target, 'alice')
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -134,7 +134,7 @@ def test_compile_revoke_other_target(type, target, compiled):
     (PgObjectType.SEQUENCE, 't', 's', ('integer',)),
 ])
 def test_compile_revoke_invalid(type, target, schema, arg_types):
-    statement = Revoke(
+    statement = revoke(
         ['ALL'], type, target, 'alice', schema=schema, arg_types=arg_types)
     with pytest.raises(ValueError):
         str(statement.compile(dialect=postgresql.dialect()))
@@ -147,4 +147,4 @@ def test_compile_revoke_invalid(type, target, schema, arg_types):
 ])
 def test_compile_revoke_privs_invalid(privs):
     with pytest.raises(ValueError):
-        Revoke(privs, PgObjectType.TABLE, 't', 'alice')
+        revoke(privs, PgObjectType.TABLE, 't', 'alice')

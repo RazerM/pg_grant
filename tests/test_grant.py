@@ -4,7 +4,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 
 from pg_grant import PgObjectType
-from pg_grant.sql import Grant
+from pg_grant.sql import grant
 
 meta = MetaData()
 Base = declarative_base()
@@ -39,7 +39,7 @@ class ModelB(Base):
     (['SELECT', 'INSERT'], 'alice', 'GRANT SELECT, INSERT ON TABLE mytable TO alice'),
 ])
 def test_compile_grant_table_privs(privs, grantee, compiled):
-    statement = Grant(privs, PgObjectType.TABLE, 'mytable', grantee)
+    statement = grant(privs, PgObjectType.TABLE, 'mytable', grantee)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -57,7 +57,7 @@ def test_compile_grant_table_privs(privs, grantee, compiled):
     (ModelB, None, 'GRANT ALL ON TABLE s.users TO alice'),
 ])
 def test_compile_grant_table_target(target, schema, compiled):
-    statement = Grant(['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
+    statement = grant(['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -66,7 +66,7 @@ def test_compile_grant_table_target(target, schema, compiled):
     (False, 'GRANT ALL ON TABLE t TO alice'),
 ])
 def test_compile_grant_table_grant_option(grant_option, compiled):
-    statement = Grant(['ALL'], PgObjectType.TABLE, 't', 'alice', grant_option)
+    statement = grant(['ALL'], PgObjectType.TABLE, 't', 'alice', grant_option)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -80,7 +80,7 @@ def test_compile_grant_table_grant_option(grant_option, compiled):
     (seq_schema, None, 'GRANT ALL ON SEQUENCE s.user_id TO alice'),
 ])
 def test_compile_grant_sequence_target(target, schema, compiled):
-    statement = Grant(['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
+    statement = grant(['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -91,7 +91,7 @@ def test_compile_grant_sequence_target(target, schema, compiled):
     ('t', 'grant', 'GRANT ALL ON TYPE "grant".t TO alice'),
 ])
 def test_compile_grant_type_target(target, schema, compiled):
-    statement = Grant(['ALL'], PgObjectType.TYPE, target, 'alice', schema=schema)
+    statement = grant(['ALL'], PgObjectType.TYPE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -105,7 +105,7 @@ def test_compile_grant_type_target(target, schema, compiled):
      'GRANT ALL ON FUNCTION "user"(text, integer) TO alice'),
 ])
 def test_compile_grant_function_target(target, arg_types, schema, compiled):
-    statement = Grant(
+    statement = grant(
         ['ALL'], PgObjectType.FUNCTION, target, 'alice', schema=schema,
         arg_types=arg_types)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
@@ -122,7 +122,7 @@ def test_compile_grant_function_target(target, arg_types, schema, compiled):
     (PgObjectType.TABLESPACE, 'user', 'GRANT ALL ON TABLESPACE "user" TO alice'),
 ])
 def test_compile_grant_other_target(type, target, compiled):
-    statement = Grant(['ALL'], type, target, 'alice')
+    statement = grant(['ALL'], type, target, 'alice')
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -134,7 +134,7 @@ def test_compile_grant_other_target(type, target, compiled):
     (PgObjectType.SEQUENCE, 't', 's', ('integer',)),
 ])
 def test_compile_grant_invalid(type, target, schema, arg_types):
-    statement = Grant(
+    statement = grant(
         ['ALL'], type, target, 'alice', schema=schema, arg_types=arg_types)
     with pytest.raises(ValueError):
         str(statement.compile(dialect=postgresql.dialect()))
@@ -147,4 +147,4 @@ def test_compile_grant_invalid(type, target, schema, arg_types):
 ])
 def test_compile_grant_privs_invalid(privs):
     with pytest.raises(ValueError):
-        Grant(privs, PgObjectType.TABLE, 't', 'alice')
+        grant(privs, PgObjectType.TABLE, 't', 'alice')
