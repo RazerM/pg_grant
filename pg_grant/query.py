@@ -6,6 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import array
 
 from .exc import NoSuchObjectError
+from .types import FunctionInfo, RelationInfo, SchemaRelationInfo
 
 __all__ = (
     'get_all_table_acls',
@@ -278,7 +279,7 @@ def _sequence_stmt(schema=None, sequence_name=None):
 
 def get_all_table_acls(conn, schema=None):
     stmt = _table_stmt(schema=schema)
-    return conn.execute(stmt).fetchall()
+    return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_table_acls(conn, table_name, schema=None):
@@ -286,12 +287,12 @@ def get_table_acls(conn, table_name, schema=None):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(table_name)
-    return row
+    return SchemaRelationInfo(**row)
 
 
 def get_all_sequence_acls(conn, schema=None):
     stmt = _sequence_stmt(schema=schema)
-    return conn.execute(stmt).fetchall()
+    return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_sequence_acls(conn, sequence, schema=None):
@@ -299,12 +300,12 @@ def get_sequence_acls(conn, sequence, schema=None):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(sequence)
-    return row
+    return SchemaRelationInfo(**row)
 
 
 def get_all_function_acls(conn, schema=None):
     stmt = _filter_pg_proc_stmt(schema=schema)
-    return conn.execute(stmt).fetchall()
+    return [FunctionInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None):
@@ -318,11 +319,11 @@ def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(function_name)
-    return row
+    return FunctionInfo(**row)
 
 
 def get_all_language_acls(conn):
-    return conn.execute(_pg_lang_stmt).fetchall()
+    return [RelationInfo(**row) for row in conn.execute(_pg_lang_stmt)]
 
 
 def get_language_acls(conn, language):
@@ -330,11 +331,11 @@ def get_language_acls(conn, language):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(language)
-    return row
+    return RelationInfo(**row)
 
 
 def get_all_schema_acls(conn):
-    return conn.execute(_pg_schema_stmt).fetchall()
+    return [RelationInfo(**row) for row in conn.execute(_pg_schema_stmt)]
 
 
 def get_schema_acls(conn, schema):
@@ -342,11 +343,11 @@ def get_schema_acls(conn, schema):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(schema)
-    return row
+    return RelationInfo(**row)
 
 
 def get_all_database_acls(conn):
-    return conn.execute(_pg_db_stmt).fetchall()
+    return [RelationInfo(**row) for row in conn.execute(_pg_db_stmt)]
 
 
 def get_database_acls(conn, database):
@@ -354,11 +355,11 @@ def get_database_acls(conn, database):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(database)
-    return row
+    return RelationInfo(**row)
 
 
 def get_all_tablespace_acls(conn):
-    return conn.execute(_pg_tablespace_stmt).fetchall()
+    return [RelationInfo(**row) for row in conn.execute(_pg_tablespace_stmt)]
 
 
 def get_tablespace_acls(conn, tablespace):
@@ -366,12 +367,12 @@ def get_tablespace_acls(conn, tablespace):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(tablespace)
-    return row
+    return RelationInfo(**row)
 
 
 def get_all_type_acls(conn, schema=None):
     stmt = _filter_pg_type_stmt(schema=schema)
-    return conn.execute(stmt).fetchall()
+    return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_type_acls(conn, type_name, schema=None):
@@ -379,4 +380,4 @@ def get_type_acls(conn, type_name, schema=None):
     row = conn.execute(stmt).fetchone()
     if row is None:
         raise NoSuchObjectError(type_name)
-    return row
+    return SchemaRelationInfo(**row)

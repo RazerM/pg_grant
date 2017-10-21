@@ -56,3 +56,36 @@ class Privileges:
                 **kwargs))
 
         return statements
+
+
+@attr.s(slots=True)
+class RelationInfo:
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+    #: Row identifier.
+    oid = attr.ib()
+
+    #: Name of the table, sequence, etc.
+    name = attr.ib()
+
+    #: Owner of the relation.
+    owner = attr.ib()
+
+    #: Access privileges (unparsed).
+    acl = attr.ib()
+
+
+@attr.s(slots=True)
+class SchemaRelationInfo(RelationInfo):
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+    #: The name of the schema that contains this relation.
+    schema = attr.ib()
+
+
+@attr.s(slots=True)
+class FunctionInfo(SchemaRelationInfo):
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+    #: Data types of the function arguments.
+    arg_types = attr.ib()

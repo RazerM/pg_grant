@@ -3,7 +3,7 @@ from functools import partial
 import pytest
 from plumbum.cmd import pg_dump
 
-from pg_grant import parse_acl_item, PgObjectType
+from pg_grant import parse_acl_item, FunctionInfo, PgObjectType
 from pg_grant.query import (
     get_all_function_acls, get_all_sequence_acls, get_all_table_acls,
     get_all_type_acls)
@@ -15,7 +15,7 @@ pytestmark = pytest.mark.nocontainer
 def _priv_acls(conn, acls, type_, revoke):
     for obj in acls:
         arg_types = None
-        if 'arg_types' in obj.keys():
+        if isinstance(obj, FunctionInfo):
             arg_types = obj.arg_types
 
         if obj.acl is not None:
