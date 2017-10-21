@@ -30,7 +30,10 @@ Example
 
    >>> from pg_grant import PgObjectType
    >>> from pg_grant.sql import revoke
-   >>> engine.execute(revoke(['SELECT'], PgObjectType.TABLE, 'table2', 'bob'))
+   >>> stmt = revoke(['SELECT'], PgObjectType.TABLE, 'table2', 'bob')
+   >>> str(stmt)
+   'REVOKE SELECT ON TABLE table2 FROM bob'
+   >>> engine.execute(stmt)
 
 Authors
 ~~~~~~~
