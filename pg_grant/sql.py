@@ -149,6 +149,22 @@ def pg_grant(element, compiler, **kw):
 
 def grant(privileges, type: PgObjectType, target, grantee, grant_option=False,
           schema=None, arg_types=None):
+    """GRANT statement that may be executed by SQLAlchemy.
+
+    Parameters:
+        privileges: List of privileges (or ``'ALL'``).
+        type: PostgreSQL object type.
+        target: Object name, or appropriate SQLAlchemy object (e.g.
+                :class:`~sqlalchemy.schema.Table` or a declarative class).
+        grantee: Role to receive privileges.
+        grant_option: Whether the recipient may in turn grant these privileges
+                      to others.
+        schema: Optional schema, if `target` is a string.
+        arg_types: Sequence of argument types for granting privileges on
+                   functions. E.g. ``('int4', 'int4')`` or ``()``.
+
+    .. seealso:: https://www.postgresql.org/docs/current/static/sql-grant.html
+    """
     return _Grant(
         privileges, type, target, grantee, grant_option=grant_option,
         schema=schema, arg_types=arg_types)
@@ -156,6 +172,25 @@ def grant(privileges, type: PgObjectType, target, grantee, grant_option=False,
 
 def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
            schema=None, arg_types=None):
+    """REVOKE statement that may be executed by SQLAlchemy.
+
+    Parameters:
+        privileges: List of privileges (or ``'ALL'``).
+        type: PostgreSQL object type.
+        target: Object name, or appropriate SQLAlchemy object (e.g.
+                :class:`~sqlalchemy.schema.Table` or a declarative class).
+        grantee: Role to lose privileges.
+        grant_option: Whether to revoke the grant option for these privilegs.
+        schema: Optional schema, if `target` is a string.
+        arg_types: Sequence of argument types for revoking privileges on
+                   functions. E.g. ``('int4', 'int4')`` or ``()``.
+
+    .. warning:: When ``grant_option=True``, only the grant option is revoked,
+                 not the privilege(s).
+
+    .. seealso:: https://www.postgresql.org/docs/current/static/sql-revoke.html
+
+    """
     return _Revoke(
         privileges, type, target, grantee, grant_option=grant_option,
         schema=schema, arg_types=arg_types)

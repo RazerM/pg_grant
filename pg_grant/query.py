@@ -278,11 +278,21 @@ def _sequence_stmt(schema=None, sequence_name=None):
 
 
 def get_all_table_acls(conn, schema=None):
+    """Unless `schema` is given, returns all tables from all schemas.
+
+    Returns:
+        List of :class:`~.types.SchemaRelationInfo` objects.
+    """
     stmt = _table_stmt(schema=schema)
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_table_acls(conn, table_name, schema=None):
+    """If `schema` is not given, the table must be visible in the search path.
+
+    Returns:
+         :class:`~.types.SchemaRelationInfo`
+    """
     stmt = _table_stmt(schema=schema, table_name=table_name)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -291,11 +301,22 @@ def get_table_acls(conn, table_name, schema=None):
 
 
 def get_all_sequence_acls(conn, schema=None):
+    """Unless `schema` is given, returns all sequences from all schemas.
+
+    Returns:
+        List of :class:`~.types.SchemaRelationInfo` objects.
+    """
     stmt = _sequence_stmt(schema=schema)
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_sequence_acls(conn, sequence, schema=None):
+    """If `schema` is not given, the sequence must be visible in the search
+    path.
+
+    Returns:
+         :class:`~.types.SchemaRelationInfo`
+    """
     stmt = _sequence_stmt(schema=schema, sequence_name=sequence)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -304,11 +325,21 @@ def get_sequence_acls(conn, sequence, schema=None):
 
 
 def get_all_function_acls(conn, schema=None):
+    """Unless `schema` is given, returns all functions from all schemas.
+
+    Returns:
+        List of :class:`~.types.FunctionInfo` objects.
+    """
     stmt = _filter_pg_proc_stmt(schema=schema)
     return [FunctionInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None):
+    """If `schema` is not given, the function must be visible in the search path.
+
+    Returns:
+         :class:`~.types.FunctionInfo`
+    """
     if (function_name is None) != (arg_types is None):
         raise TypeError('function_name and arg_types must both be specified')
 
@@ -323,10 +354,18 @@ def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None
 
 
 def get_all_language_acls(conn):
+    """
+    Returns:
+        List of :class:`~.types.RelationInfo` objects.
+    """
     return [RelationInfo(**row) for row in conn.execute(_pg_lang_stmt)]
 
 
 def get_language_acls(conn, language):
+    """
+    Returns:
+         :class:`~.types.RelationInfo`
+    """
     stmt = _pg_lang_stmt.where(pg_language.c.lanname == language)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -335,10 +374,18 @@ def get_language_acls(conn, language):
 
 
 def get_all_schema_acls(conn):
+    """
+    Returns:
+        List of :class:`~.types.RelationInfo` objects.
+    """
     return [RelationInfo(**row) for row in conn.execute(_pg_schema_stmt)]
 
 
 def get_schema_acls(conn, schema):
+    """
+    Returns:
+         :class:`~.types.RelationInfo`
+    """
     stmt = _pg_schema_stmt.where(pg_namespace.c.nspname == schema)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -347,10 +394,18 @@ def get_schema_acls(conn, schema):
 
 
 def get_all_database_acls(conn):
+    """
+    Returns:
+        List of :class:`~.types.RelationInfo` objects.
+    """
     return [RelationInfo(**row) for row in conn.execute(_pg_db_stmt)]
 
 
 def get_database_acls(conn, database):
+    """
+    Returns:
+         :class:`~.types.RelationInfo`
+    """
     stmt = _pg_db_stmt.where(pg_database.c.datname == database)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -359,10 +414,18 @@ def get_database_acls(conn, database):
 
 
 def get_all_tablespace_acls(conn):
+    """
+    Returns:
+        List of :class:`~.types.RelationInfo` objects.
+    """
     return [RelationInfo(**row) for row in conn.execute(_pg_tablespace_stmt)]
 
 
 def get_tablespace_acls(conn, tablespace):
+    """
+    Returns:
+         :class:`~.types.RelationInfo`
+    """
     stmt = _pg_tablespace_stmt.where(pg_tablespace.c.spcname == tablespace)
     row = conn.execute(stmt).fetchone()
     if row is None:
@@ -371,11 +434,21 @@ def get_tablespace_acls(conn, tablespace):
 
 
 def get_all_type_acls(conn, schema=None):
+    """Unless `schema` is given, returns all types from all schemas.
+
+    Returns:
+        List of :class:`~.types.SchemaRelationInfo` objects.
+    """
     stmt = _filter_pg_type_stmt(schema=schema)
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
 def get_type_acls(conn, type_name, schema=None):
+    """If `schema` is not given, the type must be visible in the search path.
+
+    Returns:
+         :class:`~.types.SchemaRelationInfo`
+    """
     stmt = _filter_pg_type_stmt(schema=schema, type_name=type_name)
     row = conn.execute(stmt).fetchone()
     if row is None:

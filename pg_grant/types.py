@@ -4,6 +4,7 @@ import attr
 
 
 class PgObjectType(Enum):
+    """PostgreSQL object type."""
     TABLE = 'TABLE'
     SEQUENCE = 'SEQUENCE'
     FUNCTION = 'FUNCTION'
@@ -20,12 +21,22 @@ class PgObjectType(Enum):
 
 @attr.s(slots=True)
 class Privileges:
+    """Stores information from a parsed privilege string.
+
+    .. seealso:: :func:`~.parse.parse_acl_item`
+    """
     grantee = attr.ib()
     grantor = attr.ib()
     privs = attr.ib(default=attr.Factory(list))
     privswgo = attr.ib(default=attr.Factory(list))
 
     def as_grant_statements(self, type_: PgObjectType, target, **kwargs):
+        """Return array of :func:`~.sql.grant` statements that can be executed
+        to grant these privileges. Refer to the function documentation for the
+        meaning of `target` and additional keyword arguments.
+
+        .. note:: This requires installing with the ``sqlalchemy`` extra.
+        """
         from .sql import grant
 
         statements = []
@@ -42,6 +53,13 @@ class Privileges:
         return statements
 
     def as_revoke_statements(self, type_: PgObjectType, target, **kwargs):
+        """Return array of :func:`~.sql.revoke` statements that can be executed
+        to revoke these privileges. Refer to the function documentation for the
+        meaning of `target` and additional keyword arguments.
+
+
+        .. note:: This requires installing with the ``sqlalchemy`` extra.
+        """
         from .sql import revoke
 
         statements = []

@@ -1,2 +1,2 @@
 class NoSuchObjectError(Exception):
-    pass
+    """Raised by functions in :mod:`.query` when an object does not exist."""

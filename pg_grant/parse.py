@@ -2,7 +2,7 @@ from .types import Privileges, PgObjectType
 
 
 def _get_acl_username(acl):
-    """Port of copyAclUserName from dumputils.c"""
+    """Port of ``copyAclUserName`` from ``dumputils.c``"""
     i = 0
     output = ''
 
@@ -36,12 +36,13 @@ def _get_acl_username(acl):
 
 
 def get_default_privileges(type: PgObjectType, owner):
-    """Return a list of :class:`pg_grant.types.Privileges` objects matching the
+    """Return a list of :class:`~pg_grant.types.Privileges` objects matching the
     default privileges for that type.
 
-    This can be called when the ACL item from PostgreSQL is NULL.
+    This can be called when the ACL item from PostgreSQL is NULL to determine
+    the implicit access privileges.
 
-    https://www.postgresql.org/docs/10/static/sql-grant.html
+    .. seealso:: https://www.postgresql.org/docs/10/static/sql-grant.html
     """
 
     # "the owner has all privileges by default"
@@ -76,7 +77,16 @@ def get_default_privileges(type: PgObjectType, owner):
 
 
 def parse_acl_item(acl, type: PgObjectType = None, subname=None):
-    """Port of parseAclItem from dumputils.c"""
+    """Port of ``parseAclItem`` from `dumputils.c`_
+
+    Parameters:
+        acl: ACL item, e.g. ``'alice=arwdDxt/bob'``
+        type: Optional. If passed, all privileges may be reduced to ``['ALL']``.
+        subname: Optional, e.g. for column privileges.
+
+    Returns:
+        :class:`~.types.Privileges`
+    """
     eq_pos, grantee = _get_acl_username(acl)
     assert acl[eq_pos] == '='
 
