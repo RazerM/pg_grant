@@ -44,6 +44,9 @@ class _GrantRevoke(Executable, ClauseElement):
 
     def __init__(self, privileges, type: PgObjectType, target, grantee,
                  grant_option=False, schema=None, arg_types=None):
+        if privileges == 'ALL':
+            privileges = ['ALL']
+
         invalid_privilegs = set(privileges) - self.valid_privileges
 
         if invalid_privilegs:

@@ -141,7 +141,6 @@ def test_compile_grant_invalid(type, target, schema, arg_types):
 
 
 @pytest.mark.parametrize('privs', [
-    'ALL',
     ['BLAH', 'SELECT'],
     ['BLAH'],
 ])
