@@ -13,20 +13,22 @@ Installation
 
     $ pip install pg_grant[sqlalchemy]
 
+Without the SQLAlchemy extra, ``pg_grant`` can only parse access privileges.
+
 Example
 ~~~~~~~
 
 .. code:: python
+
+   >>> from pg_grant import parse_acl_item
+   >>> parse_acl_item('bob=arw*/alice')
+   Privileges(grantee='bob', grantor='alice', privs=['SELECT', 'INSERT'], privswgo=['UPDATE'])
 
    >>> from sqlalchemy import create_engine
    >>> from pg_grant.query import get_table_acls
    >>> engine = create_engine('postgresql://...')
    >>> get_table_acls(engine, 'table2')
    SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['alice=arwdDxt/alice', 'bob=arwdDxt/alice'], schema='public')
-
-   >>> from pg_grant import parse_acl_item
-   >>> parse_acl_item('bob=arw*/alice')
-   Privileges(grantee='bob', grantor='alice', privs=['SELECT', 'INSERT'], privswgo=['UPDATE'])
 
    >>> from pg_grant import PgObjectType
    >>> from pg_grant.sql import revoke
