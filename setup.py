@@ -46,7 +46,7 @@ setup(
     name='pg_grant',
     version=VERSION,
     description=DESCRIPTION,
-    # long_description=open('README.rst').read(),
+    long_description=open('README.rst').read(),
     author=AUTHOR,
     author_email=EMAIL,
     url='https://github.com/RazerM/pg_grant',
