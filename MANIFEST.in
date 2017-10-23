@@ -1,5 +1,9 @@
 include .coveragerc
+include CHANGELOG.md
 include LICENSE
 include tox.ini
 recursive-include tests *.py
 recursive-include tests *.sql
+recursive-include docs *
+prune docs/_build
+include *-requirements.txt
