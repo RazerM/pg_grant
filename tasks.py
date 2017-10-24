@@ -6,8 +6,8 @@ from invoke import task
 @task
 def release(ctx):
     """Tag, build, then upload to PyPI"""
-    INIT_FILE = 'pg_grant/__init__.py'
-    init_data = open(INIT_FILE).read()
+    init_file = 'pg_grant/__init__.py'
+    init_data = open(init_file).read()
     metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_data))
 
     ctx.run("git tag v{0} -m '{0} release'".format(metadata['version']))
