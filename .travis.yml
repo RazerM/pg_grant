@@ -23,13 +23,7 @@ matrix:
         postgresql: 9.4
     - python: 3.6
       env: TOXENV=pep8
-#    - python: 3.6
-#      env: TOXENV=docs
-#      addons:
-#        apt:
-#          packages:
-#            - libenchant-dev
-#            - graphviz
+    - python: 3.6
 
 install:
   - pip install virtualenv wheel
