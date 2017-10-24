@@ -48,7 +48,6 @@ def test_get_all_function_acls(connection):
             continue
 
         key = (function.name, tuple(function.arg_types))
-        print(key)
 
         if key not in expected_acls[function.schema]:
             continue
