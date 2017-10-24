@@ -9,7 +9,13 @@ expected_acls = {
         # table1 has default privileges, so None is returned.
         'table1': None,
         # alice is owner, bob was granted all
-        'table2': {'bob=ar*wdDxt/alice', 'alice=arwdDxt/alice'},
+        'table2': {'alice=arwdDxt/alice', 'bob=ar*wdDxt/alice'},
+        # view1 has default privileges, so None is returned.
+        'view1': None,
+        # alice is owner, bob was granted INSERT
+        'view2': {'alice=arwdDxt/alice', 'bob=a/alice'},
+        # mview1 has default privileges, so None is returned.
+        'mview1': None,
     },
 }
 

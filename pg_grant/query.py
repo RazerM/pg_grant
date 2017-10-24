@@ -36,7 +36,14 @@ unnest = func.unnest
 
 class PgRelKind(Enum):
     TABLE = 'r'
+    INDEX = 'i'
     SEQUENCE = 'S'
+    VIEW = 'v'
+    MATERIALIZED_VIEW = 'm'
+    COMPOSITE_TYPE = 'c'
+    TOAST_TABLE = 't'
+    FOREIGN_TABLE = 'f'
+    PARTITIONED_TABLE = 'p'  # PostgresSQL 10+
 
 
 pg_class = table(
@@ -269,7 +276,13 @@ def _filter_pg_type_stmt(schema=None, type_name=None):
 
 def _table_stmt(schema=None, table_name=None):
     stmt = _filter_pg_class_stmt(schema=schema, rel_name=table_name)
-    return stmt.where(pg_class.c.relkind == PgRelKind.TABLE.value)
+    return stmt.where(pg_class.c.relkind.in_([
+        PgRelKind.TABLE.value,
+        PgRelKind.VIEW.value,
+        PgRelKind.MATERIALIZED_VIEW.value,
+        PgRelKind.PARTITIONED_TABLE.value,
+        PgRelKind.FOREIGN_TABLE.value,
+    ]))
 
 
 def _sequence_stmt(schema=None, sequence_name=None):
@@ -278,7 +291,10 @@ def _sequence_stmt(schema=None, sequence_name=None):
 
 
 def get_all_table_acls(conn, schema=None):
-    """Unless `schema` is given, returns all tables from all schemas.
+    """Get privileges for all tables, views, materialized views, and foreign
+    tables.
+
+    Specify `schema` to limit the results to that schema.
 
     Returns:
         List of :class:`~.types.SchemaRelationInfo` objects.
@@ -287,16 +303,20 @@ def get_all_table_acls(conn, schema=None):
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
-def get_table_acls(conn, table_name, schema=None):
-    """If `schema` is not given, the table must be visible in the search path.
+def get_table_acls(conn, name, schema=None):
+    """Get privileges for the table, view, materialized view, or foreign table
+    specified by `name`.
+
+    If `schema` is not given, the table or view must be visible in the search
+    path.
 
     Returns:
          :class:`~.types.SchemaRelationInfo`
     """
-    stmt = _table_stmt(schema=schema, table_name=table_name)
+    stmt = _table_stmt(schema=schema, table_name=name)
     row = conn.execute(stmt).fetchone()
     if row is None:
-        raise NoSuchObjectError(table_name)
+        raise NoSuchObjectError(name)
     return SchemaRelationInfo(**row)
 
 

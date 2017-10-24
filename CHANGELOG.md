@@ -1,7 +1,9 @@
 # Change Log
 
 ## [Unreleased][unreleased]
-N/A
+### Changed
+- `get_all_table_acls` and `get_table_acl` also return views, materialized
+  views, partitioned tables (PostgreSQL 10+), and foreign tables.
 
 ## [0.2.0.post0] - 2017-10-24
 
