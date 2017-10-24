@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from .types import Privileges, PgObjectType
 
 
@@ -76,32 +78,51 @@ def get_default_privileges(type: PgObjectType, owner):
     return priv_list
 
 
-def parse_acl_item(acl, type: PgObjectType = None, subname=None):
+def parse_acl(acl, type: Sequence[PgObjectType] = None, subname=None):
+    """
+
+    Parameters:
+        acl: ACL, e.g. ``['alice=arwdDxt/alice', 'bob=arwdDxt/alice']``
+        type: Optional. If passed, all privileges may be reduced to ``['ALL']``.
+        subname: Optional, e.g. for column privileges.
+
+    Returns:
+        List of :class:`~.types.Privileges`.
+
+    .. seealso::
+
+        This is a simple wrapper; :func:`.parse_acl_item` is called for each
+        item in `acl`.
+    """
+    return [parse_acl_item(i, type, subname) for i in acl]
+
+
+def parse_acl_item(acl_item, type: PgObjectType = None, subname=None):
     """Port of ``parseAclItem`` from `dumputils.c`_
 
     Parameters:
-        acl: ACL item, e.g. ``'alice=arwdDxt/bob'``
+        acl_item: ACL item, e.g. ``'alice=arwdDxt/bob'``
         type: Optional. If passed, all privileges may be reduced to ``['ALL']``.
         subname: Optional, e.g. for column privileges.
 
     Returns:
         :class:`~.types.Privileges`
     """
-    eq_pos, grantee = _get_acl_username(acl)
-    assert acl[eq_pos] == '='
+    eq_pos, grantee = _get_acl_username(acl_item)
+    assert acl_item[eq_pos] == '='
 
     if grantee == '':
         grantee = 'PUBLIC'
 
-    slash_pos = acl.index('/', eq_pos)
-    _, grantor = _get_acl_username(acl[slash_pos + 1:])
+    slash_pos = acl_item.index('/', eq_pos)
+    _, grantor = _get_acl_username(acl_item[slash_pos + 1:])
 
     privs = []
     privs_with_grant_option = []
 
     all_with_grant_option = all_without_grant_option = True
 
-    priv = acl[eq_pos + 1:slash_pos]
+    priv = acl_item[eq_pos + 1:slash_pos]
 
     def convert_priv(code, keyword):
         nonlocal all_with_grant_option, all_without_grant_option
