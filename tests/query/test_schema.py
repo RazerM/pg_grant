@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_schema_acls, get_schema_acls
+from pg_grant.query import get_all_schema_acls, get_schema_acl
 
 
 expected_acls = {
@@ -15,7 +15,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls.items())
 def test_get_schema_acls(connection, name, acls):
     """Find visible schemas matching ``name``."""
-    schema = get_schema_acls(connection, name)
+    schema = get_schema_acl(connection, name)
     assert schema.acl == acls
 
 
@@ -37,4 +37,4 @@ def test_get_all_schema_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_schema_acls(connection, 'schema2')
+        get_schema_acl(connection, 'schema2')

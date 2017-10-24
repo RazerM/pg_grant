@@ -2,6 +2,7 @@
 
 ## [Unreleased][unreleased]
 ### Changed
+- Renamed singular functions like `get_table_acls` to `get_table_acl`.
 - `get_all_table_acls` and `get_table_acl` also return views, materialized
   views, partitioned tables (PostgreSQL 10+), and foreign tables.
 

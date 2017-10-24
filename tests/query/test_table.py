@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_table_acls, get_table_acls
+from pg_grant.query import get_all_table_acls, get_table_acl
 
 
 expected_acls = {
@@ -28,7 +28,7 @@ def as_set(v):
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
 def test_get_table_acls_visible(connection, name, acls):
     """Find visible (i.e. in search path) tables matching ``name``."""
-    table = get_table_acls(connection, name)
+    table = get_table_acl(connection, name)
     assert as_set(table.acl) == acls
 
 
@@ -39,7 +39,7 @@ def test_get_table_acls_visible(connection, name, acls):
 ])
 def test_get_table_acls_schema(connection, schema, name, acls):
     """Find tables  from ``schema`` matching ``name``."""
-    table = get_table_acls(connection, name, schema)
+    table = get_table_acl(connection, name, schema)
     assert as_set(table.acl) == acls
 
 
@@ -66,4 +66,4 @@ def test_get_all_table_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_table_acls(connection, 'table3')
+        get_table_acl(connection, 'table3')

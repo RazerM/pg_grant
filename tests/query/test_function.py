@@ -3,7 +3,7 @@ from contextlib import suppress
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_function_acls, get_function_acls
+from pg_grant.query import get_all_function_acls, get_function_acl
 
 
 expected_acls = {
@@ -20,7 +20,7 @@ expected_acls = {
 def test_get_function_acls_visible(connection, signature, acls):
     """Find visible (i.e. in search path) functions matching ``name``."""
     name, arg_types = signature
-    function = get_function_acls(connection, name, arg_types)
+    function = get_function_acl(connection, name, arg_types)
     assert function.acl == acls
 
 
@@ -31,7 +31,7 @@ def test_get_function_acls_visible(connection, signature, acls):
 ])
 def test_get_function_acls_schema(connection, schema, name, arg_types, acls):
     """Find functions  from ``schema`` matching ``name``."""
-    function = get_function_acls(connection, name, arg_types, schema)
+    function = get_function_acl(connection, name, arg_types, schema)
     assert function.acl == acls
 
 
@@ -64,7 +64,7 @@ def test_get_all_function_acls(connection):
 ])
 def test_missing_args(function_name, arg_types):
     with pytest.raises(TypeError) as exc_info:
-        get_function_acls(None, function_name, arg_types)
+        get_function_acl(None, function_name, arg_types)
 
     msg = 'function_name and arg_types must both be specified'
     assert exc_info.value.args[0] == msg
@@ -77,7 +77,7 @@ def test_missing_args(function_name, arg_types):
 ])
 def test_invalid_arg_types_parameter(arg_types):
     with pytest.raises(TypeError) as exc_info:
-        get_function_acls(None, 'fun1', arg_types)
+        get_function_acl(None, 'fun1', arg_types)
 
     msg = 'arg_types should be a sequence of strings'
     assert msg in exc_info.value.args[0]
@@ -91,9 +91,9 @@ def test_invalid_arg_types_parameter(arg_types):
 ])
 def test_valid_arg_types_parameter(connection, arg_types):
     with suppress(NoSuchObjectError):
-        get_function_acls(connection, 'fun1', arg_types)
+        get_function_acl(connection, 'fun1', arg_types)
 
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_function_acls(connection, 'fun2', [])
+        get_function_acl(connection, 'fun2', [])

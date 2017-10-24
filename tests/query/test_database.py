@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_database_acls, get_database_acls
+from pg_grant.query import get_all_database_acls, get_database_acl
 
 
 expected_acls = {
@@ -16,7 +16,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls.items())
 def test_get_database_acls(connection, name, acls):
     """Find visible databases matching ``name``."""
-    database = get_database_acls(connection, name)
+    database = get_database_acl(connection, name)
     assert database.acl == acls
 
 
@@ -38,4 +38,4 @@ def test_get_all_database_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_database_acls(connection, 'db2')
+        get_database_acl(connection, 'db2')

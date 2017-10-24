@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_language_acls, get_language_acls
+from pg_grant.query import get_all_language_acls, get_language_acl
 
 
 expected_acls = {
@@ -15,7 +15,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls.items())
 def test_get_language_acls(connection, name, acls):
     """Find visible languages matching ``name``."""
-    language = get_language_acls(connection, name)
+    language = get_language_acl(connection, name)
     assert language.acl == acls
 
 
@@ -37,4 +37,4 @@ def test_get_all_language_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_language_acls(connection, 'eggs')
+        get_language_acl(connection, 'eggs')

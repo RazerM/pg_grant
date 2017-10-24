@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_tablespace_acls, get_tablespace_acls
+from pg_grant.query import get_all_tablespace_acls, get_tablespace_acl
 
 
 expected_acls = {
@@ -15,7 +15,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls.items())
 def test_get_tablespace_acls(connection, name, acls):
     """Find visible tablespaces matching ``name``."""
-    tablespace = get_tablespace_acls(connection, name)
+    tablespace = get_tablespace_acl(connection, name)
     assert tablespace.acl == acls
 
 
@@ -37,4 +37,4 @@ def test_get_all_tablespace_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_tablespace_acls(connection, 'eggs')
+        get_tablespace_acl(connection, 'eggs')

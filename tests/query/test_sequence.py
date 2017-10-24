@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_sequence_acls, get_sequence_acls
+from pg_grant.query import get_all_sequence_acls, get_sequence_acl
 
 
 expected_acls = {
@@ -20,7 +20,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
 def test_get_sequence_acls_visible(connection, name, acls):
     """Find visible (i.e. in search path) sequences matching ``name``."""
-    sequence = get_sequence_acls(connection, name)
+    sequence = get_sequence_acl(connection, name)
     assert sequence.acl == acls
 
 
@@ -31,7 +31,7 @@ def test_get_sequence_acls_visible(connection, name, acls):
 ])
 def test_get_sequence_acls_schema(connection, schema, name, acls):
     """Find sequences  from ``schema`` matching ``name``."""
-    sequence = get_sequence_acls(connection, name, schema)
+    sequence = get_sequence_acl(connection, name, schema)
     assert sequence.acl == acls
 
 
@@ -57,4 +57,4 @@ def test_get_all_sequence_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_sequence_acls(connection, 'seq3')
+        get_sequence_acl(connection, 'seq3')

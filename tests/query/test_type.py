@@ -1,7 +1,7 @@
 import pytest
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_type_acls, get_type_acls
+from pg_grant.query import get_all_type_acls, get_type_acl
 
 
 expected_acls = {
@@ -18,7 +18,7 @@ expected_acls = {
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
 def test_get_type_acls_visible(connection, name, acls):
     """Find visible (i.e. in search path) types matching ``name``."""
-    type_ = get_type_acls(connection, name)
+    type_ = get_type_acl(connection, name)
     assert type_.acl == acls
 
 
@@ -29,7 +29,7 @@ def test_get_type_acls_visible(connection, name, acls):
 ])
 def test_get_type_acls_schema(connection, schema, name, acls):
     """Find types  from ``schema`` matching ``name``."""
-    type_ = get_type_acls(connection, name, schema)
+    type_ = get_type_acl(connection, name, schema)
     assert type_.acl == acls
 
 
@@ -56,4 +56,4 @@ def test_get_all_type_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_type_acls(connection, 'db2')
+        get_type_acl(connection, 'db2')

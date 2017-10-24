@@ -10,21 +10,21 @@ from .types import FunctionInfo, RelationInfo, SchemaRelationInfo
 
 __all__ = (
     'get_all_table_acls',
-    'get_table_acls',
+    'get_table_acl',
     'get_all_sequence_acls',
-    'get_sequence_acls',
+    'get_sequence_acl',
     'get_all_function_acls',
-    'get_function_acls',
+    'get_function_acl',
     'get_all_language_acls',
-    'get_language_acls',
+    'get_language_acl',
     'get_all_schema_acls',
-    'get_schema_acls',
+    'get_schema_acl',
     'get_all_database_acls',
-    'get_database_acls',
+    'get_database_acl',
     'get_all_tablespace_acls',
-    'get_tablespace_acls',
+    'get_tablespace_acl',
     'get_all_type_acls',
-    'get_type_acls',
+    'get_type_acl',
 )
 
 pg_table_is_visible = func.pg_catalog.pg_table_is_visible
@@ -303,7 +303,7 @@ def get_all_table_acls(conn, schema=None):
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
-def get_table_acls(conn, name, schema=None):
+def get_table_acl(conn, name, schema=None):
     """Get privileges for the table, view, materialized view, or foreign table
     specified by `name`.
 
@@ -330,7 +330,7 @@ def get_all_sequence_acls(conn, schema=None):
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
-def get_sequence_acls(conn, sequence, schema=None):
+def get_sequence_acl(conn, sequence, schema=None):
     """If `schema` is not given, the sequence must be visible in the search
     path.
 
@@ -354,7 +354,7 @@ def get_all_function_acls(conn, schema=None):
     return [FunctionInfo(**row) for row in conn.execute(stmt)]
 
 
-def get_function_acls(conn, function_name, arg_types: Sequence[str], schema=None):
+def get_function_acl(conn, function_name, arg_types: Sequence[str], schema=None):
     """If `schema` is not given, the function must be visible in the search path.
 
     Returns:
@@ -381,7 +381,7 @@ def get_all_language_acls(conn):
     return [RelationInfo(**row) for row in conn.execute(_pg_lang_stmt)]
 
 
-def get_language_acls(conn, language):
+def get_language_acl(conn, language):
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -401,7 +401,7 @@ def get_all_schema_acls(conn):
     return [RelationInfo(**row) for row in conn.execute(_pg_schema_stmt)]
 
 
-def get_schema_acls(conn, schema):
+def get_schema_acl(conn, schema):
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -421,7 +421,7 @@ def get_all_database_acls(conn):
     return [RelationInfo(**row) for row in conn.execute(_pg_db_stmt)]
 
 
-def get_database_acls(conn, database):
+def get_database_acl(conn, database):
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -441,7 +441,7 @@ def get_all_tablespace_acls(conn):
     return [RelationInfo(**row) for row in conn.execute(_pg_tablespace_stmt)]
 
 
-def get_tablespace_acls(conn, tablespace):
+def get_tablespace_acl(conn, tablespace):
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -463,7 +463,7 @@ def get_all_type_acls(conn, schema=None):
     return [SchemaRelationInfo(**row) for row in conn.execute(stmt)]
 
 
-def get_type_acls(conn, type_name, schema=None):
+def get_type_acl(conn, type_name, schema=None):
     """If `schema` is not given, the type must be visible in the search path.
 
     Returns:
