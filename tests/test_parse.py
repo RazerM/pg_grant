@@ -1,6 +1,6 @@
 import pytest
 
-from pg_grant import PgObjectType, Privileges, parse_acl_item
+from pg_grant import PgObjectType, Privileges, parse_acl, parse_acl_item
 
 parse_data = [
     ('alice=arwdDxt/alice', 'alice', 'alice',
@@ -380,6 +380,13 @@ parse_col_data = [
 @pytest.mark.parametrize('acl, grantee, grantor, privs, privswgo', parse_data)
 def test_parse(acl, grantee, grantor, privs, privswgo):
     assert parse_acl_item(acl) == Privileges(grantee, grantor, privs, privswgo)
+
+
+def test_parse_acl():
+    assert parse_acl(['ali=a/ali', 'bob=a/ali']) == [
+        Privileges(grantee='ali', grantor='ali', privs=['INSERT'], privswgo=[]),
+        Privileges(grantee='bob', grantor='ali', privs=['INSERT'], privswgo=[])
+    ]
 
 
 @pytest.mark.parametrize(
