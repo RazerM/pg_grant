@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 3
 
    installation
+   usage
    module
 
 Indices and tables
