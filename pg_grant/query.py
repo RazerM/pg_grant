@@ -6,11 +6,13 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import array
 
 from .exc import NoSuchObjectError
-from .types import FunctionInfo, RelationInfo, SchemaRelationInfo
+from .types import ColumnInfo, FunctionInfo, RelationInfo, SchemaRelationInfo
 
 __all__ = (
     'get_all_table_acls',
     'get_table_acl',
+    'get_all_column_acls',
+    'get_column_acls',
     'get_all_sequence_acls',
     'get_sequence_acl',
     'get_all_function_acls',
@@ -113,6 +115,15 @@ pg_tablespace = table(
     column('spcacl'),
 )
 
+pg_attribute = table(
+    'pg_attribute',
+    column('attrelid'),
+    column('attname'),
+    column('attnum'),
+    column('attisdropped'),
+    column('attacl'),
+)
+
 _pg_class_stmt = (
     select([
         pg_class.c.oid,
@@ -126,6 +137,32 @@ _pg_class_stmt = (
         .outerjoin(pg_namespace, pg_class.c.relnamespace == pg_namespace.c.oid)
         .outerjoin(pg_roles, pg_class.c.relowner == pg_roles.c.oid)
     )
+)
+
+_pg_attribute_stmt = (
+    select([
+        pg_class.c.oid.label('table_oid'),
+        pg_namespace.c.nspname.label('schema'),
+        pg_class.c.relname.label('table'),
+        pg_attribute.c.attname.label('column'),
+        pg_roles.c.rolname.label('owner'),
+        cast(pg_attribute.c.attacl, ARRAY(Text)).label('acl'),
+    ])
+    .select_from(
+        pg_attribute
+        .join(pg_class, pg_attribute.c.attrelid == pg_class.c.oid)
+        .outerjoin(pg_namespace, pg_class.c.relnamespace == pg_namespace.c.oid)
+        .outerjoin(pg_roles, pg_class.c.relowner == pg_roles.c.oid)
+    )
+    .where(pg_attribute.c.attnum > 0)
+    .where(~pg_attribute.c.attisdropped)
+    .where(pg_class.c.relkind.in_([
+        PgRelKind.TABLE.value,
+        PgRelKind.VIEW.value,
+        PgRelKind.MATERIALIZED_VIEW.value,
+        PgRelKind.PARTITIONED_TABLE.value,
+        PgRelKind.FOREIGN_TABLE.value,
+    ]))
 )
 
 _pg_proc_argtypes = (
@@ -221,9 +258,7 @@ _pg_type_stmt = (
 )
 
 
-def _filter_pg_class_stmt(schema=None, rel_name=None):
-    stmt = _pg_class_stmt
-
+def _filter_pg_class_stmt(stmt, schema=None, rel_name=None):
     if schema is not None:
         stmt = stmt.where(pg_namespace.c.nspname == schema)
 
@@ -275,7 +310,8 @@ def _filter_pg_type_stmt(schema=None, type_name=None):
 
 
 def _table_stmt(schema=None, table_name=None):
-    stmt = _filter_pg_class_stmt(schema=schema, rel_name=table_name)
+    stmt = _filter_pg_class_stmt(
+        _pg_class_stmt, schema=schema, rel_name=table_name)
     return stmt.where(pg_class.c.relkind.in_([
         PgRelKind.TABLE.value,
         PgRelKind.VIEW.value,
@@ -286,7 +322,8 @@ def _table_stmt(schema=None, table_name=None):
 
 
 def _sequence_stmt(schema=None, sequence_name=None):
-    stmt = _filter_pg_class_stmt(schema=schema, rel_name=sequence_name)
+    stmt = _filter_pg_class_stmt(
+        _pg_class_stmt, schema=schema, rel_name=sequence_name)
     return stmt.where(pg_class.c.relkind == PgRelKind.SEQUENCE.value)
 
 
@@ -318,6 +355,37 @@ def get_table_acl(conn, name, schema=None):
     if row is None:
         raise NoSuchObjectError(name)
     return SchemaRelationInfo(**row)
+
+
+def get_all_column_acls(conn, schema=None):
+    """Get privileges for all table, view, materialized view, and foreign
+    table columns.
+
+    Specify `schema` to limit the results to that schema.
+
+    Returns:
+        List of :class:`~.types.ColumnInfo` objects.
+    """
+    stmt = _filter_pg_class_stmt(_pg_attribute_stmt, schema=schema)
+    return [ColumnInfo(**row) for row in conn.execute(stmt)]
+
+
+def get_column_acls(conn, table_name, schema=None):
+    """Get column privileges for the table, view, materialized view, or foreign
+    table specified by `name`.
+
+    If `schema` is not given, the table or view must be visible in the search
+    path.
+
+    Returns:
+         List of :class:`~.types.ColumnInfo` objects.
+    """
+    stmt = _filter_pg_class_stmt(
+        _pg_attribute_stmt, schema=schema, rel_name=table_name)
+    rows = conn.execute(stmt).fetchall()
+    if not rows:
+        raise NoSuchObjectError(table_name)
+    return [ColumnInfo(**row) for row in rows]
 
 
 def get_all_sequence_acls(conn, schema=None):

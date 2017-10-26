@@ -107,3 +107,26 @@ class FunctionInfo(SchemaRelationInfo):
     :mod:`.query` submodule."""
     #: Data types of the function arguments.
     arg_types = attr.ib()
+
+
+@attr.s(slots=True)
+class ColumnInfo:
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+    #: Table identifier.
+    table_oid = attr.ib()
+
+    #: The name of the schema that contains the table.
+    schema = attr.ib()
+
+    #: Name of the table.
+    table = attr.ib()
+
+    #: Name of the column.
+    column = attr.ib()
+
+    #: Owner of the table.
+    owner = attr.ib()
+
+    #: Column access control list.
+    acl = attr.ib()
