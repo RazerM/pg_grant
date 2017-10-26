@@ -49,7 +49,6 @@ types of database object. These functions use an SQLALchemy connection.
 .. code-block:: python
 
     >>> from pg_grant import query as q
-    >>>
     >>> q.get_all_table_acls(engine, schema='public')
     [SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['bob=arw/alice'], schema='public')
      ...]
