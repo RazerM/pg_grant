@@ -57,6 +57,10 @@ class Privileges:
         to revoke these privileges. Refer to the function documentation for the
         meaning of `target` and additional keyword arguments.
 
+        .. note::
+
+            The statement for the `privswgo` privileges will revoke them
+            fully, not only their grant options.
 
         .. note:: This requires installing with the ``sqlalchemy`` extra.
         """
@@ -70,8 +74,7 @@ class Privileges:
 
         if self.privswgo:
             statements.append(revoke(
-                self.privswgo, type_, target, self.grantee, grant_option=True,
-                **kwargs))
+                self.privswgo, type_, target, self.grantee, **kwargs))
 
         return statements
 

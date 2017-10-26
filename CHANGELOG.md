@@ -13,6 +13,8 @@
   views, partitioned tables (PostgreSQL 10+), and foreign tables.
 - `grant` and `revoke` will quote the subname in privileges by default, to
   ensure it is a valid identifier. Use `quote_subname=False` to disable.
+- `Privileges.as_revoke_statements` will revoke the privileges with grant
+  options fully.
 
 ## [0.2.0.post0] - 2017-10-24
 

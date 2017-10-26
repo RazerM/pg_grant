@@ -1,9 +1,11 @@
+from unittest.mock import patch
+
 import pytest
 from sqlalchemy import Column, Integer, MetaData, Sequence, Table, table
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 
-from pg_grant import PgObjectType
+from pg_grant import PgObjectType, Privileges
 from pg_grant.sql import grant
 
 meta = MetaData()
@@ -187,3 +189,32 @@ def test_compile_grant_invalid(type, target, schema, arg_types):
 def test_compile_grant_privs_invalid(privs):
     with pytest.raises(ValueError):
         str(grant(privs, PgObjectType.TABLE, 't', 'alice'))
+
+
+@pytest.mark.parametrize('grantee, privs, privswgo, type_, target, kw', [
+    ('alice', ['SELECT', 'INSERT'], [], PgObjectType.FOREIGN_TABLE, 'table1', {}),
+    ('alice', ['SELECT'], ['INSERT'], PgObjectType.TABLE, 'table2', {'schema': 's'}),
+])
+def test_privileges_as_grant_statements(grantee, privs, privswgo, type_, target, kw):
+    priv = Privileges(grantee, 'bob', privs, privswgo)
+
+    def fake_grant(*args, **kwargs):
+        return args, kwargs
+
+    patch_grant = patch('pg_grant.sql.grant', fake_grant)
+
+    with patch_grant:
+        r = priv.as_grant_statements(type_, target, **kw)
+
+    expected = []
+
+    if privs:
+        expected.append(((privs, type_, target, grantee), kw))
+
+    if privswgo:
+        gokw = kw.copy()
+        gokw.update(grant_option=True)
+        expected.append(((privswgo, type_, target, grantee), gokw))
+
+    assert r == expected
+
