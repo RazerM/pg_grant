@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy import inspect
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import ClauseElement, Executable
@@ -8,6 +10,10 @@ __all__ = (
     'grant',
     'revoke',
 )
+
+re_valid_priv = re.compile(
+    r'(SELECT|UPDATE|INSERT|DELETE|TRUNCATE|REFERENCES|TRIGGER|EXECUTE|USAGE'
+    r'|CREATE|CONNECT|TEMPORARY|ALL)(?:\s+\((.*)\))?')
 
 
 def _as_table(element):
@@ -43,15 +49,11 @@ class _GrantRevoke(Executable, ClauseElement):
     keyword = None
 
     def __init__(self, privileges, type: PgObjectType, target, grantee,
-                 grant_option=False, schema=None, arg_types=None):
+                 grant_option=False, schema=None, arg_types=None,
+                 quote_subname=True):
+
         if privileges == 'ALL':
             privileges = ['ALL']
-
-        invalid_privilegs = set(privileges) - self.valid_privileges
-
-        if invalid_privilegs:
-            raise ValueError(
-                'Privileges not valid: {}'.format(', '.join(invalid_privilegs)))
 
         self.privileges = privileges
         self.priv_type = type
@@ -60,6 +62,7 @@ class _GrantRevoke(Executable, ClauseElement):
         self.grant_option = grant_option
         self.schema = schema
         self.arg_types = arg_types
+        self.quote_subname = quote_subname
 
 
 class _Grant(_GrantRevoke):
@@ -72,14 +75,31 @@ class _Revoke(_GrantRevoke):
 
 @compiles(_GrantRevoke)
 def pg_grant(element, compiler, **kw):
-    priv = ', '.join(element.privileges)
-
     target = element.target
     schema = element.schema
     arg_types = element.arg_types
     priv_type = element.priv_type
 
     preparer = compiler.preparer
+
+    privs = []
+
+    for priv in element.privileges:
+        match = re_valid_priv.match(priv)
+        if match is None:
+            raise ValueError('Privilege not valid: {}'.format(priv))
+
+        subname = match.group(2)
+
+        if subname is not None:
+            if element.quote_subname:
+                subname = preparer.quote(subname)
+
+            privs.append('{} ({})'.format(match.group(1), subname))
+        else:
+            privs.append(match.group(1))
+
+    priv = ', '.join(privs)
 
     str_target = None
 
@@ -148,7 +168,7 @@ def pg_grant(element, compiler, **kw):
 
 
 def grant(privileges, type: PgObjectType, target, grantee, grant_option=False,
-          schema=None, arg_types=None):
+          schema=None, arg_types=None, quote_subname=True):
     """GRANT statement that may be executed by SQLAlchemy.
 
     Parameters:
@@ -162,16 +182,20 @@ def grant(privileges, type: PgObjectType, target, grantee, grant_option=False,
         schema: Optional schema, if `target` is a string.
         arg_types: Sequence of argument types for granting privileges on
                    functions. E.g. ``('int4', 'int4')`` or ``()``.
+        quote_subname: Quote subname identifier in privileges, e.g.
+                       ``'SELECT (user)'`` -> ``'SELECT ("user")``. This should
+                       only be ``False`` if the subname is already a valid
+                       identifier.
 
     .. seealso:: https://www.postgresql.org/docs/current/static/sql-grant.html
     """
     return _Grant(
         privileges, type, target, grantee, grant_option=grant_option,
-        schema=schema, arg_types=arg_types)
+        schema=schema, arg_types=arg_types, quote_subname=quote_subname)
 
 
 def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
-           schema=None, arg_types=None):
+           schema=None, arg_types=None, quote_subname=True):
     """REVOKE statement that may be executed by SQLAlchemy.
 
     Parameters:
@@ -184,6 +208,10 @@ def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
         schema: Optional schema, if `target` is a string.
         arg_types: Sequence of argument types for revoking privileges on
                    functions. E.g. ``('int4', 'int4')`` or ``()``.
+        quote_subname: Quote subname identifier in privileges, e.g.
+                       ``'SELECT (user)'`` -> ``'SELECT ("user")``. This should
+                       only be ``False`` if the subname is already a valid
+                       identifier.
 
     .. warning:: When ``grant_option=True``, only the grant option is revoked,
                  not the privilege(s).
@@ -193,4 +221,4 @@ def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
     """
     return _Revoke(
         privileges, type, target, grantee, grant_option=grant_option,
-        schema=schema, arg_types=arg_types)
+        schema=schema, arg_types=arg_types, quote_subname=quote_subname)

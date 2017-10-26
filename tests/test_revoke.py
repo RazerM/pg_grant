@@ -146,4 +146,4 @@ def test_compile_revoke_invalid(type, target, schema, arg_types):
 ])
 def test_compile_revoke_privs_invalid(privs):
     with pytest.raises(ValueError):
-        revoke(privs, PgObjectType.TABLE, 't', 'alice')
+        str(revoke(privs, PgObjectType.TABLE, 't', 'alice'))

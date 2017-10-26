@@ -7,6 +7,8 @@
 - Renamed singular functions like `get_table_acls` to `get_table_acl`.
 - `get_all_table_acls` and `get_table_acl` also return views, materialized
   views, partitioned tables (PostgreSQL 10+), and foreign tables.
+- `grant` and `revoke` will quote the subname in privileges by default, to
+  ensure it is a valid identifier. Use `quote_subname=False` to disable.
 
 ## [0.2.0.post0] - 2017-10-24
 

@@ -57,7 +57,8 @@ def test_compile_grant_table_privs(privs, grantee, compiled):
     (ModelB, None, 'GRANT ALL ON TABLE s.users TO alice'),
 ])
 def test_compile_grant_table_target(target, schema, compiled):
-    statement = grant(['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
+    statement = grant(
+        ['ALL'], PgObjectType.TABLE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -71,6 +72,44 @@ def test_compile_grant_table_grant_option(grant_option, compiled):
 
 
 @pytest.mark.parametrize('target, schema, compiled', [
+    ('t', None, 'GRANT ALL (a) ON TABLE t TO alice'),
+    ('user', None, 'GRANT ALL (a) ON TABLE "user" TO alice'),
+    ('t', 's', 'GRANT ALL (a) ON TABLE s.t TO alice'),
+    ('t', 'grant', 'GRANT ALL (a) ON TABLE "grant".t TO alice'),
+    (simple_table, None, 'GRANT ALL (a) ON TABLE users TO alice'),
+    (simple_table_kw, None, 'GRANT ALL (a) ON TABLE "user" TO alice'),
+    (full_table, None, 'GRANT ALL (a) ON TABLE users TO alice'),
+    (full_table_kw, None, 'GRANT ALL (a) ON TABLE "user" TO alice'),
+    (full_table_schema, None, 'GRANT ALL (a) ON TABLE s.users TO alice'),
+    (ModelA, None, 'GRANT ALL (a) ON TABLE "user" TO alice'),
+    (ModelB, None, 'GRANT ALL (a) ON TABLE s.users TO alice'),
+])
+def test_compile_grant_table_column(target, schema, compiled):
+    statement = grant(
+        ['ALL (a)'], PgObjectType.TABLE, target, 'alice', schema=schema)
+    assert str(statement.compile(dialect=postgresql.dialect())) == compiled
+
+
+@pytest.mark.parametrize('target, schema, compiled', [
+    ('t', None, 'GRANT ALL ("user") ON TABLE t TO alice'),
+])
+def test_compile_grant_table_column_quote(target, schema, compiled):
+    statement = grant(
+        ['ALL (user)'], PgObjectType.TABLE, target, 'alice', schema=schema)
+    assert str(statement.compile(dialect=postgresql.dialect())) == compiled
+
+
+@pytest.mark.parametrize('target, schema, compiled', [
+    ('t', None, 'GRANT ALL ("user") ON TABLE t TO alice'),
+])
+def test_compile_grant_table_column_quoted_already(target, schema, compiled):
+    statement = grant(
+        ['ALL ("user")'], PgObjectType.TABLE, target, 'alice', schema=schema,
+        quote_subname=False)
+    assert str(statement.compile(dialect=postgresql.dialect())) == compiled
+
+
+@pytest.mark.parametrize('target, schema, compiled', [
     ('t', None, 'GRANT ALL ON SEQUENCE t TO alice'),
     ('user', None, 'GRANT ALL ON SEQUENCE "user" TO alice'),
     ('t', 's', 'GRANT ALL ON SEQUENCE s.t TO alice'),
@@ -80,7 +119,8 @@ def test_compile_grant_table_grant_option(grant_option, compiled):
     (seq_schema, None, 'GRANT ALL ON SEQUENCE s.user_id TO alice'),
 ])
 def test_compile_grant_sequence_target(target, schema, compiled):
-    statement = grant(['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
+    statement = grant(
+        ['ALL'], PgObjectType.SEQUENCE, target, 'alice', schema=schema)
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -146,4 +186,4 @@ def test_compile_grant_invalid(type, target, schema, arg_types):
 ])
 def test_compile_grant_privs_invalid(privs):
     with pytest.raises(ValueError):
-        grant(privs, PgObjectType.TABLE, 't', 'alice')
+        str(grant(privs, PgObjectType.TABLE, 't', 'alice'))
