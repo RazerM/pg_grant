@@ -103,7 +103,41 @@ def parse_acl_item(acl_item, type: PgObjectType = None, subname=None):
     Parameters:
         acl_item: ACL item, e.g. ``'alice=arwdDxt/bob'``
         type: Optional. If passed, all privileges may be reduced to ``['ALL']``.
-        subname: Optional, e.g. for column privileges.
+        subname: Optional, e.g. for column privileges. Must be output from
+                 :func:`psycopg2.extensions.quote_ident` or similar.
+
+    .. warning::
+
+        If the ``privs`` or ``privswgo`` attributes of the returned object will
+        be used to construct an SQL statement, `subname` **must be a valid
+        identifier** (e.g. by calling :func:`psycopg2.extensions.quote_ident`)
+        in order to prevent SQL injection attacks.
+
+        :func:`~pg_grant.sql.grant` and :func:`~pg_grant.sql.revoke` are not
+        vulnerable, because those functions quote the embedded identifier:
+
+        .. code-block:: python
+
+            >>> from pg_grant import PgObjectType, parse_acl_item
+            >>> from pg_grant.sql import grant
+            >>> privs = parse_acl_item('alice=r/bob', subname='user')
+            >>> privs.privs
+            ['SELECT (user)']
+            >>> str(grant(privs.privs, PgObjectType.TABLE, 'tbl1', 'alice'))
+           'GRANT SELECT ("user") ON TABLE tbl1 TO alice'
+
+        Note that ``"user"`` was quoted by :func:`~pg_grant.sql.grant`.
+
+        In other cases, make sure to quote `subname`:
+
+        .. code-block:: python
+
+            >>> import psycopg2
+            >>> from psycopg2.extensions import quote_ident
+            >>> conn = psycopg2.connect(...)
+            >>> parse_acl_item('alice=r/bob', subname=quote_ident('user', conn))
+            >>> privs.privs
+            ['SELECT ("user")']
 
     Returns:
         :class:`~.types.Privileges`
