@@ -38,7 +38,7 @@ def test_get_table_acls_visible(connection, name, acls):
     for name, acl in d.items()
 ])
 def test_get_table_acls_schema(connection, schema, name, acls):
-    """Find tables  from ``schema`` matching ``name``."""
+    """Find tables from ``schema`` matching ``name``."""
     table = get_table_acl(connection, name, schema)
     assert as_set(table.acl) == acls
 
