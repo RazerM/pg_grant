@@ -89,7 +89,7 @@ class RelationInfo:
     #: Owner of the relation.
     owner = attr.ib()
 
-    #: Access privileges (unparsed).
+    #: Access control list.
     acl = attr.ib()
 
 
