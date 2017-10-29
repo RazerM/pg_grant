@@ -44,7 +44,7 @@ Querying
 ========
 
 The :mod:`pg_grant.query` submodule has functions for loading ACLs for many
-types of database object. These functions use an SQLALchemy connection.
+types of database object. These functions use an SQLALchemy connection:
 
 .. code-block:: python
 
@@ -55,6 +55,16 @@ types of database object. These functions use an SQLALchemy connection.
     >>> q.get_table_acl(engine, 'table2')
     SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['bob=arw/alice'], schema='public')
 
-All of the functions return an object or list of objects with ``acl`` attributes
-that can be parsed with :func:`~pg_grant.parse.parse_acl`.
+All of the functions return an object or list of objects with ``acl``
+attributes that can be parsed with :func:`~pg_grant.parse.parse_acl`.
 
+When an acl is ``None``, it means that default privileges apply to the object:
+
+.. code-block:: python
+
+    >>> from pg_grant import PgObjectType, get_default_privileges
+    >>> from pg_grant import query as q
+    >>> q.get_table_acl(engine, 'table2')
+    SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=None, schema='public')
+    >>> get_default_privileges(PgObjectType.TABLE, owner='alice')
+    [Privileges(grantee='alice', grantor='alice', privs=['ALL'], privswgo=[])]

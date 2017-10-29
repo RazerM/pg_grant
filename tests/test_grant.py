@@ -217,4 +217,3 @@ def test_privileges_as_grant_statements(grantee, privs, privswgo, type_, target,
         expected.append(((privswgo, type_, target, grantee), gokw))
 
     assert r == expected
-
