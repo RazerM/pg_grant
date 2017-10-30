@@ -1,7 +1,7 @@
 pg_grant
 -------------
 
-|PyPI Version| |Documentation| |Travis| |Coverage| |Python Version| |MIT License|
+|PyPI Version| |Documentation| |Travis| |Coverage| |Python Version| |PostgreSQL Version| |License|
 
 ``pg_grant`` is a Python module for parsing, querying, and updating PostgreSQL
 privileges.
@@ -58,7 +58,9 @@ pg_grant uses `semantic versioning <http://semver.org>`__
    :target: https://pypi.python.org/pypi/pg_grant/
 .. |Python Version| image:: https://img.shields.io/badge/python-3-brightgreen.svg?style=flat-square
    :target: https://www.python.org/downloads/
-.. |MIT License| image:: http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
+.. |PostgreSQL Version| image:: https://img.shields.io/badge/PostgreSQL-9.3--10-blue.svg?style=flat-square
+   :target: https://www.postgresql.org/
+.. |License| image:: https://img.shields.io/github/license/RazerM/pg_grant.svg?style=flat-square
    :target: https://raw.githubusercontent.com/RazerM/pg_grant/master/LICENSE.txt
 .. |Coverage| image:: https://img.shields.io/codecov/c/github/RazerM/pg_grant/master.svg?style=flat-square
    :target: https://codecov.io/github/RazerM/pg_grant?branch=master
