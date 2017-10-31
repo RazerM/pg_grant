@@ -34,7 +34,7 @@ class ModelB(Base):
 
 @pytest.mark.parametrize('privs, grantee, compiled', [
     (['ALL'], 'alice', 'GRANT ALL ON TABLE mytable TO alice'),
-    (['ALL'], 'PUBLIC', 'GRANT ALL ON TABLE mytable TO PUBLIC'),
+    ('ALL', 'PUBLIC', 'GRANT ALL ON TABLE mytable TO PUBLIC'),
     (['ALL'], 'public', 'GRANT ALL ON TABLE mytable TO public'),
     (['ALL'], 'grant', 'GRANT ALL ON TABLE mytable TO "grant"'),
     (['SELECT'], 'alice', 'GRANT SELECT ON TABLE mytable TO alice'),
