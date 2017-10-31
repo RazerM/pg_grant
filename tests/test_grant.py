@@ -191,6 +191,12 @@ def test_compile_grant_privs_invalid(privs):
         str(grant(privs, PgObjectType.TABLE, 't', 'alice'))
 
 
+def test_compile_grant_function_privs_invalid():
+    with pytest.raises(ValueError) as exc_info:
+        str(grant(['ALL'], PgObjectType.FUNCTION, 'fun1', 'alice'))
+    assert 'use an empty sequence' in exc_info.value.args[0]
+
+
 @pytest.mark.parametrize('grantee, privs, privswgo, type_, target, kw', [
     ('alice', ['SELECT', 'INSERT'], [], PgObjectType.FOREIGN_TABLE, 'table1', {}),
     ('alice', ['SELECT'], ['INSERT'], PgObjectType.TABLE, 'table2', {'schema': 's'}),
