@@ -19,30 +19,35 @@ matrix:
       env:
         - TOXENV=py36
         - NOCONTAINER=1
+        - PG_VER=9.3
       addons:
         postgresql: 9.3
     - python: 3.6
       env:
         - TOXENV=py36
         - NOCONTAINER=1
+        - PG_VER=9.4
       addons:
         postgresql: 9.4
     - python: 3.6
       env:
         - TOXENV=py36
         - NOCONTAINER=1
+        - PG_VER=9.5
       addons:
         postgresql: 9.5
     - python: 3.6
       env:
         - TOXENV=py36
         - NOCONTAINER=1
+        - PG_VER=9.6
       addons:
         postgresql: 9.6
     - python: 3.6
       env:
         - TOXENV=py36
         - NOCONTAINER=1
+        - PG_VER=10
       addons:
         postgresql: 10
     - python: 3.6
