@@ -16,7 +16,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
-def test_get_type_acls_visible(connection, name, acls):
+def test_get_type_acl_visible(connection, name, acls):
     """Find visible (i.e. in search path) types matching ``name``."""
     type_ = get_type_acl(connection, name)
     assert type_.acl == acls
@@ -27,7 +27,7 @@ def test_get_type_acls_visible(connection, name, acls):
     for schema, d in expected_acls.items()
     for name, acl in d.items()
 ])
-def test_get_type_acls_schema(connection, schema, name, acls):
+def test_get_type_acl_schema(connection, schema, name, acls):
     """Find types  from ``schema`` matching ``name``."""
     type_ = get_type_acl(connection, name, schema)
     assert type_.acl == acls

@@ -13,7 +13,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls.items())
-def test_get_schema_acls(connection, name, acls):
+def test_get_schema_acl(connection, name, acls):
     """Find visible schemas matching ``name``."""
     schema = get_schema_acl(connection, name)
     assert schema.acl == acls

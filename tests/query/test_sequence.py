@@ -18,7 +18,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
-def test_get_sequence_acls_visible(connection, name, acls):
+def test_get_sequence_acl_visible(connection, name, acls):
     """Find visible (i.e. in search path) sequences matching ``name``."""
     sequence = get_sequence_acl(connection, name)
     assert sequence.acl == acls
@@ -29,7 +29,7 @@ def test_get_sequence_acls_visible(connection, name, acls):
     for schema, d in expected_acls.items()
     for seq, acl in d.items()
 ])
-def test_get_sequence_acls_schema(connection, schema, name, acls):
+def test_get_sequence_acl_schema(connection, schema, name, acls):
     """Find sequences  from ``schema`` matching ``name``."""
     sequence = get_sequence_acl(connection, name, schema)
     assert sequence.acl == acls

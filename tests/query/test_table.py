@@ -26,7 +26,7 @@ def as_set(v):
 
 
 @pytest.mark.parametrize('name, acls', expected_acls['public'].items())
-def test_get_table_acls_visible(connection, name, acls):
+def test_get_table_acl_visible(connection, name, acls):
     """Find visible (i.e. in search path) tables matching ``name``."""
     table = get_table_acl(connection, name)
     assert as_set(table.acl) == acls
@@ -37,7 +37,7 @@ def test_get_table_acls_visible(connection, name, acls):
     for schema, d in expected_acls.items()
     for name, acl in d.items()
 ])
-def test_get_table_acls_schema(connection, schema, name, acls):
+def test_get_table_acl_schema(connection, schema, name, acls):
     """Find tables from ``schema`` matching ``name``."""
     table = get_table_acl(connection, name, schema)
     assert as_set(table.acl) == acls

@@ -17,7 +17,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('signature, acls', expected_acls['public'].items())
-def test_get_function_acls_visible(connection, signature, acls):
+def test_get_function_acl_visible(connection, signature, acls):
     """Find visible (i.e. in search path) functions matching ``name``."""
     name, arg_types = signature
     function = get_function_acl(connection, name, arg_types)
@@ -29,7 +29,7 @@ def test_get_function_acls_visible(connection, signature, acls):
     for schema, d in expected_acls.items()
     for (name, arg_types), acl in d.items()
 ])
-def test_get_function_acls_schema(connection, schema, name, arg_types, acls):
+def test_get_function_acl_schema(connection, schema, name, arg_types, acls):
     """Find functions  from ``schema`` matching ``name``."""
     function = get_function_acl(connection, name, arg_types, schema)
     assert function.acl == acls

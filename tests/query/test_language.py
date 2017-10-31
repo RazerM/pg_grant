@@ -13,7 +13,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls.items())
-def test_get_language_acls(connection, name, acls):
+def test_get_language_acl(connection, name, acls):
     """Find visible languages matching ``name``."""
     language = get_language_acl(connection, name)
     assert language.acl == acls

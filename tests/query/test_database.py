@@ -14,7 +14,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls.items())
-def test_get_database_acls(connection, name, acls):
+def test_get_database_acl(connection, name, acls):
     """Find visible databases matching ``name``."""
     database = get_database_acl(connection, name)
     assert database.acl == acls

@@ -13,7 +13,7 @@ expected_acls = {
 
 
 @pytest.mark.parametrize('name, acls', expected_acls.items())
-def test_get_tablespace_acls(connection, name, acls):
+def test_get_tablespace_acl(connection, name, acls):
     """Find visible tablespaces matching ``name``."""
     tablespace = get_tablespace_acl(connection, name)
     assert tablespace.acl == acls
