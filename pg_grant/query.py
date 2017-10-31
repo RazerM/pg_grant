@@ -2,8 +2,8 @@ from enum import Enum
 from typing import Sequence
 
 from sqlalchemy import (
-    ARRAY, Text, cast, column, func, select, table, text)
-from sqlalchemy.dialects.postgresql import array
+    ARRAY, Text, case, cast, column, func, select, table, text, types)
+from sqlalchemy.engine import Connectable
 
 from .exc import NoSuchObjectError
 from .types import ColumnInfo, FunctionInfo, RelationInfo, SchemaRelationInfo
@@ -165,8 +165,10 @@ _pg_attribute_stmt = (
     ]))
 )
 
+canonical_type = func.pg_temp.pg_grant_canonical_type
+
 _pg_proc_argtypes = (
-    select([array_agg(pg_type.c.typname)])
+    select([array_agg(canonical_type(pg_type.c.typname))])
     .select_from(
         unnest(pg_proc.c.proargtypes).alias('upat')
         .join(pg_type, text('upat') == pg_type.c.oid)
@@ -284,12 +286,23 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
         stmt = stmt.where(pg_namespace.c.nspname == schema)
 
     if function_name is not None:
+        arg_types = list(arg_types)
+
+        if arg_types:
+            arg_types_sub = (
+                select([array_agg(canonical_type(column('typs')))])
+                .select_from(func.unnest(arg_types).alias('typs'))
+                .as_scalar()
+            )
+        else:
+            arg_types_sub = []
+
         if schema is None:
             stmt = stmt.where(pg_function_is_visible(pg_proc.c.oid))
         stmt = stmt.where(pg_proc.c.proname == function_name)
         stmt = stmt.where(
             # have to cast RHS in case it's empty
-            cast(_pg_proc_argtypes, ARRAY(Text)) == cast(array(arg_types), ARRAY(Text))
+            _pg_proc_argtypes == arg_types_sub
         )
 
     return stmt
@@ -412,12 +425,43 @@ def get_sequence_acl(conn, sequence, schema=None):
     return SchemaRelationInfo(**row)
 
 
+def _make_canonical_type_function(conn):
+    """Create function which canonicalizes a type name, returning the input
+    when casting to REGTYPE fails.
+
+    E.g. casting the 'any' type fails. Normal examples include 'int4' -> 'integer'
+    """
+    # pg_temp is per-connection
+    stmt = text("""
+        CREATE OR REPLACE FUNCTION pg_temp.pg_grant_canonical_type(typname text)
+        RETURNS text AS $$
+        BEGIN
+          BEGIN
+            typname := typname::regtype::text;
+          EXCEPTION WHEN syntax_error THEN
+          END;
+          RETURN typname;
+        END;
+        $$
+        LANGUAGE plpgsql
+        STABLE
+        RETURNS NULL ON NULL INPUT;
+    """)
+    conn.execute(stmt)
+
+
 def get_all_function_acls(conn, schema=None):
     """Unless `schema` is given, returns all functions from all schemas.
 
     Returns:
         List of :class:`~.types.FunctionInfo` objects.
     """
+    # conn might be an engine, and the created function must be on the same
+    # connection used by the main query.
+    if isinstance(conn, Connectable):
+        conn = conn.connect()
+
+    _make_canonical_type_function(conn)
     stmt = _filter_pg_proc_stmt(schema=schema)
     return [FunctionInfo(**row) for row in conn.execute(stmt)]
 
@@ -428,11 +472,21 @@ def get_function_acl(conn, function_name, arg_types: Sequence[str], schema=None)
     Returns:
          :class:`~.types.FunctionInfo`
     """
+    # conn might be an engine, and the created function must be on the same
+    # connection used by the main query.
+    if isinstance(conn, Connectable):
+        conn = conn.connect()
+
+    # We could ask the user to register an event on their connection pool which
+    # creates this function on checkout, but that isn't a nice API for the
+    # common case.
+    _make_canonical_type_function(conn)
+
     if (function_name is None) != (arg_types is None):
         raise TypeError('function_name and arg_types must both be specified')
 
     if not isinstance(arg_types, Sequence) or isinstance(arg_types, str):
-        raise TypeError("arg_types should be a sequence of strings, e.g. ['int4']")
+        raise TypeError("arg_types should be a sequence of strings, e.g. ['text']")
 
     stmt = _filter_pg_proc_stmt(schema, function_name, arg_types)
     row = conn.execute(stmt).fetchone()

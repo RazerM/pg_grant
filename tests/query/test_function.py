@@ -1,4 +1,5 @@
 from contextlib import suppress
+from unittest.mock import Mock
 
 import pytest
 
@@ -9,7 +10,7 @@ from pg_grant.query import get_all_function_acls, get_function_acl
 expected_acls = {
     'public': {
         # fun1 has default privileges, so None is returned.
-        ('fun1', ('int4',)): None,
+        ('fun1', ('integer',)): None,
         # alice is owner, execute was revoked from public
         ('fun1', ('text',)): ['alice=X/alice'],
     },
@@ -22,6 +23,13 @@ def test_get_function_acl_visible(connection, signature, acls):
     name, arg_types = signature
     function = get_function_acl(connection, name, arg_types)
     assert function.acl == acls
+
+
+def test_get_function_acl_canonical_type(connection):
+    f1 = get_function_acl(connection, 'fun1', ('int4',), 'public')
+    f2 = get_function_acl(connection, 'fun1', ('integer',), 'public')
+    assert f1 == f2
+    assert f1.arg_types == ['integer']
 
 
 @pytest.mark.parametrize('schema, name, arg_types, acls', [
@@ -39,7 +47,7 @@ def test_get_all_function_acls(connection):
     """Get all sequences in all schemas."""
     functions = get_all_function_acls(connection)
     schemas = {x.schema for x in functions}
-    assert schemas == {'public', 'information_schema', 'pg_catalog'}
+    assert schemas >= {'public', 'information_schema', 'pg_catalog'}
 
     tested = 0
 
@@ -48,6 +56,7 @@ def test_get_all_function_acls(connection):
             continue
 
         key = (function.name, tuple(function.arg_types))
+        print(key)
 
         if key not in expected_acls[function.schema]:
             continue
@@ -64,7 +73,7 @@ def test_get_all_function_acls(connection):
 ])
 def test_missing_args(function_name, arg_types):
     with pytest.raises(TypeError) as exc_info:
-        get_function_acl(None, function_name, arg_types)
+        get_function_acl(Mock(), function_name, arg_types)
 
     msg = 'function_name and arg_types must both be specified'
     assert exc_info.value.args[0] == msg
@@ -77,7 +86,7 @@ def test_missing_args(function_name, arg_types):
 ])
 def test_invalid_arg_types_parameter(arg_types):
     with pytest.raises(TypeError) as exc_info:
-        get_function_acl(None, 'fun1', arg_types)
+        get_function_acl(Mock(), 'fun1', arg_types)
 
     msg = 'arg_types should be a sequence of strings'
     assert msg in exc_info.value.args[0]

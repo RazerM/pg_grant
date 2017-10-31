@@ -15,6 +15,9 @@
   ensure it is a valid identifier. Use `quote_subname=False` to disable.
 - `Privileges.as_revoke_statements` will revoke the privileges with grant
   options fully.
+- `get_all_function_acls` and `get_function_acl` now return canonical type
+  names, e.g. 'integer' instead of 'int4'. The `arg_types` parameter on
+  `get_function_acl` also canonicalizes user input.
 
 ## [0.2.0.post0] - 2017-10-24
 
