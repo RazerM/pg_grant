@@ -33,6 +33,7 @@ pg_function_is_visible = func.pg_catalog.pg_function_is_visible
 pg_type_is_visible = func.pg_catalog.pg_type_is_visible
 array_agg = func.array_agg
 unnest = func.unnest
+canonical_type = func.pg_temp.pg_grant_canonical_type
 
 
 class PgRelKind(Enum):
@@ -163,8 +164,6 @@ _pg_attribute_stmt = (
         PgRelKind.FOREIGN_TABLE.value,
     ]))
 )
-
-canonical_type = func.pg_temp.pg_grant_canonical_type
 
 _pg_proc_argtypes = (
     select([array_agg(canonical_type(pg_type.c.typname))])
