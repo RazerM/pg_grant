@@ -2,10 +2,11 @@ from contextlib import suppress
 from unittest.mock import Mock
 
 import pytest
+from sqlalchemy import func
 
 from pg_grant import NoSuchObjectError
-from pg_grant.query import get_all_function_acls, get_function_acl
-
+from pg_grant.query import (
+    _make_canonical_type_function, get_all_function_acls, get_function_acl)
 
 expected_acls = {
     'public': {
@@ -15,6 +16,8 @@ expected_acls = {
         ('fun1', ('text',)): ['alice=X/alice'],
     },
 }
+
+canonical_type = func.pg_temp.pg_grant_canonical_type
 
 
 @pytest.mark.parametrize('signature, acls', expected_acls['public'].items())
@@ -30,6 +33,18 @@ def test_get_function_acl_canonical_type(connection):
     f2 = get_function_acl(connection, 'fun1', ('integer',), 'public')
     assert f1 == f2
     assert f1.arg_types == ['integer']
+
+
+@pytest.mark.parametrize('type_name, canonical_name', [
+    ('any', 'any'),
+    ('anyarray', 'anyarray'),
+    ('int4', 'integer'),
+    ('float', 'double precision'),
+    ('timestamptz', 'timestamp with time zone'),
+])
+def test_canonical_type_function(connection, type_name, canonical_name):
+    _make_canonical_type_function(connection)
+    assert connection.scalar(canonical_type(type_name)) == canonical_name
 
 
 @pytest.mark.parametrize('schema, name, arg_types, acls', [
