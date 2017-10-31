@@ -11,7 +11,7 @@ __all__ = (
     'revoke',
 )
 
-re_valid_priv = re.compile(
+_re_valid_priv = re.compile(
     r'(SELECT|UPDATE|INSERT|DELETE|TRUNCATE|REFERENCES|TRIGGER|EXECUTE|USAGE'
     r'|CREATE|CONNECT|TEMPORARY|ALL)(?:\s+\((.*)\))?')
 
@@ -74,7 +74,7 @@ class _Revoke(_GrantRevoke):
 
 
 @compiles(_GrantRevoke)
-def pg_grant(element, compiler, **kw):
+def _pg_grant(element, compiler, **kw):
     target = element.target
     schema = element.schema
     arg_types = element.arg_types
@@ -85,7 +85,7 @@ def pg_grant(element, compiler, **kw):
     privs = []
 
     for priv in element.privileges:
-        match = re_valid_priv.match(priv)
+        match = _re_valid_priv.match(priv)
         if match is None:
             raise ValueError('Privilege not valid: {}'.format(priv))
 
