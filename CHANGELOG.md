@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased][unreleased]
+N/A
+
+## [0.3.0][]
 ### Added
 - `parse_acl` function to call `parse_acl_item` on each item in a list.
 - Documentation on `parse_acl_item` about ensuring `subname` is a valid
@@ -27,6 +30,7 @@ Minor packaging changes.
 
 First release.
 
-[unreleased]: https://github.com/python-astrodynamics/spacetrack/compare/0.2.0.post0...HEAD
-[0.2.0.post0]: https://github.com/RazerM/pg_grant/compare/38e53889bf9923b63d79805dc050dcd26a40d518...0.2.0.post0
-[0.2.0]: https://github.com/RazerM/pg_grant/compare/38e53889bf9923b63d79805dc050dcd26a40d518...0.2.0
+[unreleased]: https://github.com/python-astrodynamics/spacetrack/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/RazerM/pg_grant/compare/v0.2.0...v0.3.0
+[0.2.0.post0]: https://github.com/RazerM/pg_grant/compare/v0.2.0...v.2.0.post0
+[0.2.0]: https://github.com/RazerM/pg_grant/compare/38e53889bf9923b63d79805dc050dcd26a40d518...vå0.2.0
