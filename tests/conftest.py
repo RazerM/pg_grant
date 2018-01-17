@@ -4,7 +4,7 @@ import pytest
 import testing.postgresql
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
-from testcontainers import PostgresContainer as _PostgresContainer
+from testcontainers.postgres import PostgresContainer as _PostgresContainer
 
 tests_dir = Path(__file__).parents[0].resolve()
 test_schema_file = Path(tests_dir, 'data', 'test-schema.sql')
