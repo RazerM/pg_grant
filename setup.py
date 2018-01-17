@@ -14,32 +14,32 @@ DESCRIPTION = metadata['description']
 AUTHOR = metadata['author']
 EMAIL = metadata['email']
 
-requires = {
+requires = [
     'attrs',
-}
+]
 
 extras_require = {
-    ':python_version<"3.5"': {
+    ':python_version<"3.5"': [
         'typing',
-    },
-    'sqlalchemy': {
+    ],
+    'sqlalchemy': [
         'sqlalchemy[postgresql]',
-    },
-    'test': {
+    ],
+    'test': [
         'plumbum',
         'pytest>=3.0',
         'testcontainers',
         'testing.postgresql',
-    },
-    'docstest': {
+    ],
+    'docstest': [
         'doc8',
         'sphinx',
         'sphinx_rtd_theme',
-    },
-    'pep8test': {
+    ],
+    'pep8test': [
         'flake8',
         'pep8-naming',
-    },
+    ],
 }
 
 setup(
