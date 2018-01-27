@@ -204,7 +204,7 @@ def revoke(privileges, type: PgObjectType, target, grantee, grant_option=False,
         target: Object name, or appropriate SQLAlchemy object (e.g.
                 :class:`~sqlalchemy.schema.Table` or a declarative class).
         grantee: Role to lose privileges.
-        grant_option: Whether to revoke the grant option for these privilegs.
+        grant_option: Whether to revoke the grant option for these privileges.
         schema: Optional schema, if `target` is a string.
         arg_types: Sequence of argument types for revoking privileges on
                    functions. E.g. ``('int4', 'int4')`` or ``()``.
