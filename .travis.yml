@@ -52,6 +52,13 @@ matrix:
       addons:
         postgresql: 10
     - python: 3.7
+      env:
+        - TOXENV=py37
+        - NOCONTAINER=1
+        - PG_VER=11
+      addons:
+        postgresql: 11
+    - python: 3.7
       env: TOXENV=pep8
     - python: 3.7
       env: TOXENV=docs
