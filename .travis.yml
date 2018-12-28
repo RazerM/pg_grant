@@ -20,13 +20,6 @@ matrix:
       env:
         - TOXENV=py37
         - NOCONTAINER=1
-        - PG_VER=9.3
-      addons:
-        postgresql: 9.3
-    - python: 3.7
-      env:
-        - TOXENV=py37
-        - NOCONTAINER=1
         - PG_VER=9.4
       addons:
         postgresql: 9.4
