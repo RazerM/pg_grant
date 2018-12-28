@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import testing.postgresql
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
 from testcontainers.postgres import PostgresContainer as _PostgresContainer
 
@@ -20,7 +20,7 @@ Postgresql = testing.postgresql.PostgresqlFactory(
 
 
 class PostgresContainer(_PostgresContainer):
-    POSTGRES_USER = SUPERUSER_NAME
+    POSTGRES_USER = 'postgres'
     POSTGRES_DB = DB_NAME
 
 
@@ -52,7 +52,15 @@ def postgres_url(request):
     else:
         postgres_container = PostgresContainer("postgres:latest")
         with postgres_container as postgres:
-            yield postgres.get_connection_url()
+            # Use superuser to create new superuser, then yield new connection URL
+            url = make_url(postgres.get_connection_url())
+            engine = create_engine(url)
+            s = 'CREATE ROLE {} WITH SUPERUSER LOGIN PASSWORD :password'.format(SUPERUSER_NAME)
+            engine.execute(text(s), password=postgres_container.POSTGRES_PASSWORD)
+            engine.dispose()
+            url.username = SUPERUSER_NAME
+
+            yield str(url)
 
 
 @pytest.fixture(scope='session')
