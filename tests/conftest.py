@@ -55,8 +55,13 @@ def postgres_url(request):
             # Use superuser to create new superuser, then yield new connection URL
             url = make_url(postgres.get_connection_url())
             engine = create_engine(url)
-            s = 'CREATE ROLE {} WITH SUPERUSER LOGIN PASSWORD :password'.format(SUPERUSER_NAME)
-            engine.execute(text(s), password=postgres_container.POSTGRES_PASSWORD)
+            engine.execute(
+                text(
+                    'CREATE ROLE {} WITH SUPERUSER LOGIN PASSWORD '
+                    ':password'.format(SUPERUSER_NAME)
+                ),
+                password=postgres_container.POSTGRES_PASSWORD,
+            )
             engine.dispose()
             url.username = SUPERUSER_NAME
 
