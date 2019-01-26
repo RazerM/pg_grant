@@ -3,12 +3,12 @@
 ## [Unreleased][unreleased]
 N/A
 
-## [0.3.1][]
+## [0.3.1][] - 2018-01-17
 ### Fixed
 - `pg_grant` can be installed with setuptools v38.0+, which requires
   `install_requires` in `setup.py` to be ordered.
 
-## [0.3.0][]
+## [0.3.0][] - 2017-10-31
 ### Added
 - `parse_acl` function to call `parse_acl_item` on each item in a list.
 - Documentation on `parse_acl_item` about ensuring `subname` is a valid
