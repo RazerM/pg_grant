@@ -58,7 +58,7 @@ pg_grant uses `semantic versioning <http://semver.org>`__
     :target: https://pypi.python.org/pypi/pg_grant/
 .. |Python Version| image:: https://img.shields.io/badge/Python-3-brightgreen.svg?style=flat-square
     :target: https://www.python.org/downloads/
-.. |PostgreSQL Version| image:: https://img.shields.io/badge/PostgreSQL-9.3--10-blue.svg?style=flat-square
+.. |PostgreSQL Version| image:: https://img.shields.io/badge/PostgreSQL-9.4--11-blue.svg?style=flat-square
     :target: https://www.postgresql.org/
 .. |License| image:: https://img.shields.io/github/license/RazerM/pg_grant.svg?style=flat-square
     :target: https://raw.githubusercontent.com/RazerM/pg_grant/master/LICENSE.txt
