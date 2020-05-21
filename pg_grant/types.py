@@ -27,8 +27,8 @@ class Privileges:
     """
     grantee = attr.ib()
     grantor = attr.ib()
-    privs = attr.ib(default=attr.Factory(list))
-    privswgo = attr.ib(default=attr.Factory(list))
+    privs = attr.ib(factory=list)
+    privswgo = attr.ib(factory=list)
 
     def as_grant_statements(self, type_: PgObjectType, target, **kwargs):
         """Return array of :func:`~.sql.grant` statements that can be executed
