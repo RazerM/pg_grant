@@ -3,6 +3,10 @@
 ## [Unreleased][unreleased]
 N/A
 
+## [0.3.2][] - 2020-05-21
+### Fixed
+- Type annotations for `parse_acl` and `parse_acl_item`.
+
 ## [0.3.1][] - 2018-01-17
 ### Fixed
 - `pg_grant` can be installed with setuptools v38.0+, which requires
@@ -35,7 +39,8 @@ Minor packaging changes.
 
 First release.
 
-[unreleased]: https://github.com/RazerM/pg_grant/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/RazerM/pg_grant/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/RazerM/pg_grant/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/RazerM/pg_grant/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/RazerM/pg_grant/compare/v0.2.0...v0.3.0
 [0.2.0.post0]: https://github.com/RazerM/pg_grant/compare/v0.2.0...v0.2.0.post0
