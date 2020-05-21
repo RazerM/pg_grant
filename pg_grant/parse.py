@@ -78,7 +78,7 @@ def get_default_privileges(type: PgObjectType, owner):
     return priv_list
 
 
-def parse_acl(acl, type: Sequence[PgObjectType] = None, subname=None):
+def parse_acl(acl, type: PgObjectType = None, subname=None):
     """
 
     Parameters:
