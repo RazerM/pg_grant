@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List, Optional, Sequence
 
 from .types import Privileges, PgObjectType
 
@@ -37,7 +37,7 @@ def _get_acl_username(acl):
     return i, output
 
 
-def get_default_privileges(type: PgObjectType, owner):
+def get_default_privileges(type: PgObjectType, owner: str) -> List[Privileges]:
     """Return a list of :class:`~pg_grant.types.Privileges` objects matching the
     default privileges for that type.
 
@@ -78,7 +78,11 @@ def get_default_privileges(type: PgObjectType, owner):
     return priv_list
 
 
-def parse_acl(acl, type: PgObjectType = None, subname=None):
+def parse_acl(
+    acl: Sequence[str],
+    type: Optional[PgObjectType] = None,
+    subname: Optional[str] = None,
+) -> List[Privileges]:
     """
 
     Parameters:
@@ -97,7 +101,11 @@ def parse_acl(acl, type: PgObjectType = None, subname=None):
     return [parse_acl_item(i, type, subname) for i in acl]
 
 
-def parse_acl_item(acl_item, type: PgObjectType = None, subname=None):
+def parse_acl_item(
+    acl_item: str,
+    type: Optional[PgObjectType] = None,
+    subname: Optional[str] = None,
+) -> Privileges:
     """Port of ``parseAclItem`` from `dumputils.c`_
 
     Parameters:
