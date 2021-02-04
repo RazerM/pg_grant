@@ -293,15 +293,12 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
                 .as_scalar()
             )
         else:
-            arg_types_sub = []
+            arg_types_sub = cast([], ARRAY(Text))
 
         if schema is None:
             stmt = stmt.where(pg_function_is_visible(pg_proc.c.oid))
         stmt = stmt.where(pg_proc.c.proname == function_name)
-        stmt = stmt.where(
-            # have to cast RHS in case it's empty
-            _pg_proc_argtypes == arg_types_sub
-        )
+        stmt = stmt.where(_pg_proc_argtypes == arg_types_sub)
 
     return stmt
 
