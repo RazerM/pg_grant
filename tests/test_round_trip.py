@@ -1,6 +1,7 @@
 from functools import partial
 
 import pytest
+from plumbum import ProcessExecutionError
 from plumbum.cmd import pg_dump
 
 from pg_grant import parse_acl_item, FunctionInfo, PgObjectType
@@ -49,7 +50,14 @@ revoke_function_acls = partial(_priv_acls, type_=PgObjectType.FUNCTION, revoke=T
 def test_revoke_grant_schema_relations(connection, postgres_url, get, revoke, grant):
     cmd = pg_dump['--schema-only', postgres_url]
 
-    code, dump1, _ = cmd.run()
+    try:
+        code, dump1, err = cmd.run()
+    except ProcessExecutionError as exc:
+        if 'server version mismatch' in exc.stderr:
+            pytest.skip("pg_dump is older than server version")
+        else:
+            raise
+
     assert code == 0
 
     acls = get(connection, 'public')
