@@ -33,6 +33,7 @@ pg_function_is_visible = func.pg_catalog.pg_function_is_visible
 pg_type_is_visible = func.pg_catalog.pg_type_is_visible
 array_agg = func.array_agg
 unnest = func.unnest
+coalesce = func.coalesce
 canonical_type = func.pg_temp.pg_grant_canonical_type
 
 
@@ -166,7 +167,7 @@ _pg_attribute_stmt = (
 )
 
 _pg_proc_argtypes = (
-    select([array_agg(canonical_type(pg_type.c.typname))])
+    select([coalesce(array_agg(canonical_type(pg_type.c.typname)), cast([], ARRAY(Text)))])
     .select_from(
         unnest(pg_proc.c.proargtypes).alias('upat')
         .join(pg_type, text('upat') == pg_type.c.oid)
