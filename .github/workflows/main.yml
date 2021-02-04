@@ -10,17 +10,18 @@ on:
 
 jobs:
   tests:
-    name: "Python ${{ matrix.python-version }}"
+    name: "Python ${{ matrix.python-version }}, PostgreSQL ${{ matrix.postgres-version }}"
     runs-on: "ubuntu-latest"
 
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        postgres-version: ["11", "12", "13", "14", "15"]
 
     services:
       postgres:
-        image: postgres:14
+        image: "postgres:${{ matrix.postgres-version }}"
         ports:
           - 5440:5432
         env:
