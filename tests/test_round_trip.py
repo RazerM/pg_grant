@@ -9,9 +9,6 @@ from pg_grant.query import (
     get_all_type_acls)
 
 
-pytestmark = pytest.mark.nocontainer
-
-
 def _priv_acls(conn, acls, type_, revoke):
     for obj in acls:
         arg_types = None

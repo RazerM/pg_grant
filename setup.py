@@ -28,8 +28,6 @@ extras_require = {
     'test': [
         'plumbum',
         'pytest>=3.0',
-        'testcontainers[postgresql,selenium]',
-        'testing.postgresql',
     ],
     'docstest': [
         'doc8',
