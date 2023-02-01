@@ -26,6 +26,7 @@ def postgres_url():
     dbname = 'db1'
     superusers = ['alice']
     users = ['bob', 'charlie']
+    password = 'hunter2'
 
     # We'll make a new database and roles in the cluster, so let's check that
     # they don't match that of the configured superuser url.
@@ -36,14 +37,17 @@ def postgres_url():
     with closing(conn), conn.cursor() as cur:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         for user in superusers:
-            cur.execute(sql.SQL("CREATE USER {} WITH SUPERUSER").format(sql.Identifier(user)))
+            stmt = sql.SQL("CREATE USER {} WITH SUPERUSER PASSWORD {}")
+            cur.execute(stmt.format(sql.Identifier(user), sql.Literal(password)))
         for user in users:
-            cur.execute(sql.SQL("CREATE USER {}").format(sql.Identifier(user)))
+            stmt = sql.SQL("CREATE USER {}")
+            cur.execute(stmt.format(sql.Identifier(user)))
         cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
 
     test_url = make_url(str(superuser_url))
     test_url.database = dbname
     test_url.username = superusers[0]
+    test_url.password = password
 
     yield str(test_url)
 
