@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy import Column, Integer, MetaData, Sequence, Table, table
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from pg_grant import PgObjectType, Privileges
 from pg_grant.sql import revoke

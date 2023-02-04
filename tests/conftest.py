@@ -68,8 +68,8 @@ def engine(postgres_url):
 @pytest.fixture(scope='session')
 def pg_schema(engine):
     with test_schema_file.open() as fp:
-        with engine.connect() as conn:
-            conn.execute(fp.read())
+        with engine.begin() as conn:
+            conn.execute(text(fp.read()))
 
 
 @pytest.fixture

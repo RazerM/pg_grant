@@ -60,14 +60,16 @@ def test_revoke_grant_schema_relations(connection, postgres_url, get, revoke, gr
 
     assert code == 0
 
-    acls = get(connection, 'public')
-    revoke(connection, acls)
+    with connection.begin():
+        acls = get(connection, 'public')
+        revoke(connection, acls)
 
     code, dump2, _ = cmd.run()
     assert code == 0
     assert dump1 != dump2
 
-    grant(connection, acls)
+    with connection.begin():
+        grant(connection, acls)
 
     code, dump3, _ = cmd.run()
     assert code == 0
