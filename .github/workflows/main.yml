@@ -1,0 +1,51 @@
+---
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: "Python ${{ matrix.python-version }}, PostgreSQL ${{ matrix.postgres-version }}"
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        postgres-version: ["11", "12", "13", "14", "15"]
+
+    services:
+      postgres:
+        image: "postgres:${{ matrix.postgres-version }}"
+        ports:
+          - 5440:5432
+        env:
+          POSTGRES_PASSWORD: hunter2
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: "Install dependencies"
+        run: |
+          set -xe
+          python -VV
+          python -m site
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade tox tox-gh-actions
+
+      - name: "Run tox targets for ${{ matrix.python-version }}"
+        run: "python -m tox -- -v"
+        env:
+          DATABASE_URL: postgresql://postgres:hunter2@localhost:5440/postgres

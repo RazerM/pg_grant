@@ -23,13 +23,11 @@ extras_require = {
         'typing',
     ],
     'sqlalchemy': [
-        'sqlalchemy[postgresql]',
+        'sqlalchemy[postgresql]<1.4',
     ],
     'test': [
         'plumbum',
         'pytest>=3.0',
-        'testcontainers[postgresql,selenium]',
-        'testing.postgresql',
     ],
     'docstest': [
         'doc8',

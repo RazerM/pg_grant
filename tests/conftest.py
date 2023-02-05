@@ -1,82 +1,78 @@
+import os
+from contextlib import closing
+from itertools import chain
 from pathlib import Path
 
+import psycopg2
+from psycopg2 import sql
 import pytest
-import testing.postgresql
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
-from testcontainers.postgres import PostgresContainer as _PostgresContainer
 
 tests_dir = Path(__file__).parents[0].resolve()
 test_schema_file = Path(tests_dir, 'data', 'test-schema.sql')
 
-SUPERUSER_NAME = 'alice'
-DB_NAME = 'db1'
-
-
-Postgresql = testing.postgresql.PostgresqlFactory(
-    initdb_args='-U postgres -A trust',
-    database=DB_NAME,
-)
-
-
-class PostgresContainer(_PostgresContainer):
-    POSTGRES_USER = 'postgres'
-    POSTGRES_DB = DB_NAME
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        '--no-container', action='store_true',
-        help='Use temporary PostgreSQL cluster without a container.')
-
-
-def pytest_runtest_setup(item):
-    if 'nocontainer' in item.keywords and not item.config.getoption('--no-container'):
-        pytest.skip('Use --no-container to execute this test.')
+# This matches docker-compose.yml for easy local development
+DEFAULT_DATABASE_URL = 'postgresql://postgres@127.0.0.1:5440/postgres'
 
 
 @pytest.fixture(scope='session')
-def postgres_url(request):
-    no_container = request.config.getoption("--no-container")
-    if no_container:
-        postgresql = Postgresql()
+def postgres_url():
+    # The only global state we want from the system is a superuser connection to
+    # an empty database cluster.
+    superuser_url = make_url(os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
 
-        # Use superuser to create new superuser, then yield new connection URL
-        url = make_url(postgresql.url())
-        engine = create_engine(url)
-        engine.execute('CREATE ROLE {} WITH SUPERUSER LOGIN'.format(SUPERUSER_NAME))
-        engine.dispose()
-        url.username = SUPERUSER_NAME
+    dbname = 'db1'
+    superusers = ['alice']
+    users = ['bob', 'charlie']
+    password = 'hunter2'
 
-        yield str(url)
-    else:
-        postgres_container = PostgresContainer("postgres:latest")
-        with postgres_container as postgres:
-            # Use superuser to create new superuser, then yield new connection URL
-            url = make_url(postgres.get_connection_url())
-            engine = create_engine(url)
-            engine.execute(
-                text(
-                    'CREATE ROLE {} WITH SUPERUSER LOGIN PASSWORD '
-                    ':password'.format(SUPERUSER_NAME)
-                ),
-                password=postgres_container.POSTGRES_PASSWORD,
-            )
-            engine.dispose()
-            url.username = SUPERUSER_NAME
+    # We'll make a new database and roles in the cluster, so let's check that
+    # they don't match that of the configured superuser url.
+    assert superuser_url.username not in {*superusers, *users}
+    assert superuser_url.database != dbname
 
-            yield str(url)
+    conn = psycopg2.connect(str(superuser_url))
+    with closing(conn), conn.cursor() as cur:
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        for user in superusers:
+            stmt = sql.SQL("CREATE USER {} WITH SUPERUSER PASSWORD {}")
+            cur.execute(stmt.format(sql.Identifier(user), sql.Literal(password)))
+        for user in users:
+            stmt = sql.SQL("CREATE USER {}")
+            cur.execute(stmt.format(sql.Identifier(user)))
+        cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
+
+    test_url = make_url(str(superuser_url))
+    test_url.database = dbname
+    test_url.username = superusers[0]
+    test_url.password = password
+
+    yield str(test_url)
+
+    conn = psycopg2.connect(str(superuser_url))
+    with closing(conn), conn.cursor() as cur:
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(dbname)))
+        for user in chain(superusers, users):
+            user_ident = sql.Identifier(user)
+            cur.execute(sql.SQL("DROP OWNED BY {} CASCADE").format(user_ident))
+            cur.execute(sql.SQL("DROP USER {}").format(user_ident))
 
 
 @pytest.fixture(scope='session')
 def engine(postgres_url):
-    return create_engine(postgres_url)
+    engine = create_engine(postgres_url)
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture(scope='session')
 def pg_schema(engine):
     with test_schema_file.open() as fp:
-        engine.execute(fp.read())
+        with engine.connect() as conn:
+            conn.execute(fp.read())
 
 
 @pytest.fixture

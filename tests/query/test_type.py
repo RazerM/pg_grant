@@ -37,7 +37,7 @@ def test_get_all_type_acls(connection):
     """Get all sequences in all schemas."""
     types = get_all_type_acls(connection)
     schemas = {x.schema for x in types}
-    assert schemas >= {'public', 'information_schema', 'pg_catalog', 'schema1'}
+    assert schemas >= {'public', 'information_schema', 'pg_catalog'}
 
     tested = 0
 

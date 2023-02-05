@@ -14,6 +14,7 @@ expected_acls = {
         ('fun1', ('integer',)): None,
         # alice is owner, execute was revoked from public
         ('fun1', ('text',)): ['alice=X/alice'],
+        ('fun2', ()): None,
     },
 }
 
@@ -120,4 +121,4 @@ def test_valid_arg_types_parameter(connection, arg_types):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_function_acl(connection, 'fun2', [])
+        get_function_acl(connection, 'fun3', [])

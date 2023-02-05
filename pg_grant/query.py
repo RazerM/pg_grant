@@ -33,6 +33,7 @@ pg_function_is_visible = func.pg_catalog.pg_function_is_visible
 pg_type_is_visible = func.pg_catalog.pg_type_is_visible
 array_agg = func.array_agg
 unnest = func.unnest
+coalesce = func.coalesce
 canonical_type = func.pg_temp.pg_grant_canonical_type
 
 
@@ -166,7 +167,7 @@ _pg_attribute_stmt = (
 )
 
 _pg_proc_argtypes = (
-    select([array_agg(canonical_type(pg_type.c.typname))])
+    select([coalesce(array_agg(canonical_type(pg_type.c.typname)), cast([], ARRAY(Text)))])
     .select_from(
         unnest(pg_proc.c.proargtypes).alias('upat')
         .join(pg_type, text('upat') == pg_type.c.oid)
@@ -293,15 +294,12 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
                 .as_scalar()
             )
         else:
-            arg_types_sub = []
+            arg_types_sub = cast([], ARRAY(Text))
 
         if schema is None:
             stmt = stmt.where(pg_function_is_visible(pg_proc.c.oid))
         stmt = stmt.where(pg_proc.c.proname == function_name)
-        stmt = stmt.where(
-            # have to cast RHS in case it's empty
-            _pg_proc_argtypes == arg_types_sub
-        )
+        stmt = stmt.where(_pg_proc_argtypes == arg_types_sub)
 
     return stmt
 
