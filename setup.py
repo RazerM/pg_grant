@@ -23,7 +23,7 @@ extras_require = {
         'typing',
     ],
     'sqlalchemy': [
-        'sqlalchemy[postgresql]<1.4',
+        'sqlalchemy[postgresql]<2',
     ],
     'test': [
         'plumbum',

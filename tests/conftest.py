@@ -44,10 +44,7 @@ def postgres_url():
             cur.execute(stmt.format(sql.Identifier(user)))
         cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
 
-    test_url = make_url(str(superuser_url))
-    test_url.database = dbname
-    test_url.username = superusers[0]
-    test_url.password = password
+    test_url = superuser_url.set(database=dbname, username=superusers[0], password=password)
 
     yield str(test_url)
 
