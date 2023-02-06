@@ -33,7 +33,7 @@ def postgres_url():
     assert superuser_url.username not in {*superusers, *users}
     assert superuser_url.database != dbname
 
-    conn = psycopg2.connect(str(superuser_url))
+    conn = psycopg2.connect(superuser_url.render_as_string(hide_password=False))
     with closing(conn), conn.cursor() as cur:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         for user in superusers:
@@ -46,9 +46,9 @@ def postgres_url():
 
     test_url = superuser_url.set(database=dbname, username=superusers[0], password=password)
 
-    yield str(test_url)
+    yield test_url.render_as_string(hide_password=False)
 
-    conn = psycopg2.connect(str(superuser_url))
+    conn = psycopg2.connect(superuser_url.render_as_string(hide_password=False))
     with closing(conn), conn.cursor() as cur:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(dbname)))
