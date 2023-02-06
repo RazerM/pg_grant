@@ -1,1 +1,1 @@
-sqlalchemy[postgresql]<2
+sqlalchemy[postgresql]
