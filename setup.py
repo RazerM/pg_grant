@@ -57,4 +57,6 @@ setup(
     license=LICENSE,
     install_requires=requires,
     extras_require=extras_require,
-    tests_require=extras_require['test'])
+    tests_require=extras_require['test'],
+    python_requires='>=3.6',
+)
