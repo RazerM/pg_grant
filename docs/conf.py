@@ -270,8 +270,8 @@ texinfo_documents = [
 
 # intersphinx
 intersphinx_mapping = {
-    'python': ('http://docs.python.org/3', None),
-    'psycopg2': ('http://initd.org/psycopg/docs', None),
+    'python': ('https://docs.python.org/3', None),
+    'psycopg2': ('https://www.psycopg.org/docs/', None),
 }
 
 autodoc_member_order = 'bysource'
