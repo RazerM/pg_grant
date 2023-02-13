@@ -23,7 +23,7 @@ dependencies = ["attrs"]
 [project.optional-dependencies]
 sqlalchemy = ["sqlalchemy[postgresql]>=1.4"]
 test = ["plumbum", "pytest"]
-docs = ["pg_grant[sqlalchemy]"]
+docs = ["pg_grant[sqlalchemy]", "sphinx>=6"]
 docstest = ["doc8", "sphinx", "sphinx_rtd_theme"]
 pep8test = ["flake8", "pep8-naming"]
 
