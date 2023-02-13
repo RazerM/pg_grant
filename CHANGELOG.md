@@ -26,7 +26,7 @@ SQLAlchemy 1.4 or later**
 
 ### Fixed
 - ACLs for functions without any arguments (i.e. `arg_types=()`) could not be
-  queried using `get_function_acl`. 
+  queried using `get_function_acl`.
 
 ## [0.3.2][] - 2020-05-21
 ### Fixed
