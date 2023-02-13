@@ -49,10 +49,10 @@ types of database object. These functions use an SQLALchemy connection:
 .. code-block:: python
 
     >>> from pg_grant import query as q
-    >>> q.get_all_table_acls(engine, schema='public')
+    >>> q.get_all_table_acls(conn, schema='public')
     [SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['bob=arw/alice'], schema='public')
      ...]
-    >>> q.get_table_acl(engine, 'table2')
+    >>> q.get_table_acl(conn, 'table2')
     SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['bob=arw/alice'], schema='public')
 
 All of the functions return an object or list of objects with ``acl``
@@ -64,7 +64,7 @@ When an acl is ``None``, it means that default privileges apply to the object:
 
     >>> from pg_grant import PgObjectType, get_default_privileges
     >>> from pg_grant import query as q
-    >>> q.get_table_acl(engine, 'table2')
+    >>> q.get_table_acl(conn, 'table2')
     SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=None, schema='public')
     >>> get_default_privileges(PgObjectType.TABLE, owner='alice')
     [Privileges(grantee='alice', grantor='alice', privs=['ALL'], privswgo=[])]

@@ -27,7 +27,8 @@ Example
     >>> from sqlalchemy import create_engine
     >>> from pg_grant.query import get_table_acl
     >>> engine = create_engine('postgresql://...')
-    >>> get_table_acl(engine, 'table2')
+    >>> with engine.connect() as conn:
+    ...     get_table_acl(conn, 'table2')
     SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['alice=arwdDxt/alice', 'bob=arwdDxt/alice'], schema='public')
 
     >>> from pg_grant import PgObjectType
