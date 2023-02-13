@@ -2,7 +2,6 @@ from enum import Enum
 from typing import Sequence
 
 from sqlalchemy import ARRAY, Text, cast, column, func, select, table, text
-from sqlalchemy.engine import Connectable
 
 from .exc import NoSuchObjectError
 from .types import ColumnInfo, FunctionInfo, RelationInfo, SchemaRelationInfo
