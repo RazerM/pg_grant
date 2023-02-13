@@ -6,13 +6,13 @@ from pg_grant.query import get_all_tablespace_acls, get_tablespace_acl
 
 expected_acls = {
     # pg_default has default privileges, so None is returned.
-    'pg_default': None,
+    "pg_default": None,
     # postgres is owner, alice was granted CONNECT
-    'pg_global': ['postgres=C/postgres', 'alice=C/postgres'],
+    "pg_global": ["postgres=C/postgres", "alice=C/postgres"],
 }
 
 
-@pytest.mark.parametrize('name, acls', expected_acls.items())
+@pytest.mark.parametrize("name, acls", expected_acls.items())
 def test_get_tablespace_acl(connection, name, acls):
     """Find visible tablespaces matching ``name``."""
     tablespace = get_tablespace_acl(connection, name)
@@ -37,4 +37,4 @@ def test_get_all_tablespace_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_tablespace_acl(connection, 'eggs')
+        get_tablespace_acl(connection, "eggs")

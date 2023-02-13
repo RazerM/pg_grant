@@ -5,23 +5,23 @@ from pg_grant.query import get_all_column_acls, get_column_acls
 
 
 expected_acls = {
-    'public': {
-        'table1': {
-            'id': None,
+    "public": {
+        "table1": {
+            "id": None,
         },
-        'table2': {
-            'id': None,
-            'user': {'charlie=r/alice'},
+        "table2": {
+            "id": None,
+            "user": {"charlie=r/alice"},
         },
-        'view1': {
-            'id': None,
+        "view1": {
+            "id": None,
         },
-        'view2': {
-            'id': {'charlie=arwx/alice'},
-            'user': None,
+        "view2": {
+            "id": {"charlie=arwx/alice"},
+            "user": None,
         },
-        'mview1': {
-            'id': None,
+        "mview1": {
+            "id": None,
         },
     },
 }
@@ -32,7 +32,7 @@ def as_set(v):
         return set(v)
 
 
-@pytest.mark.parametrize('table_name, columns', expected_acls['public'].items())
+@pytest.mark.parametrize("table_name, columns", expected_acls["public"].items())
 def test_get_column_acls_visible(connection, table_name, columns):
     """Find columns for visible (i.e. in search path) tables matching
     ``table_name``.
@@ -45,11 +45,14 @@ def test_get_column_acls_visible(connection, table_name, columns):
         assert as_set(column_acls[col]) == acl
 
 
-@pytest.mark.parametrize('schema, table_name, columns', [
-    (schema, table_name, columns)
-    for schema, d in expected_acls.items()
-    for table_name, columns in d.items()
-])
+@pytest.mark.parametrize(
+    "schema, table_name, columns",
+    [
+        (schema, table_name, columns)
+        for schema, d in expected_acls.items()
+        for table_name, columns in d.items()
+    ],
+)
 def test_get_column_acls_schema(connection, schema, table_name, columns):
     """Find columns for tables from ``schema`` matching ``name``."""
     column_acls = get_column_acls(connection, table_name, schema)
@@ -64,7 +67,7 @@ def test_get_all_column_acls(connection):
     """Get all sequences in all schemas."""
     column_acls = get_all_column_acls(connection)
     schemas = {x.schema for x in column_acls}
-    assert schemas == {'public', 'information_schema', 'pg_catalog'}
+    assert schemas == {"public", "information_schema", "pg_catalog"}
 
     tested = 0
 
@@ -83,4 +86,4 @@ def test_get_all_column_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_column_acls(connection, 'table3')
+        get_column_acls(connection, "table3")

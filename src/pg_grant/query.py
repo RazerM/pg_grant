@@ -8,24 +8,24 @@ from .exc import NoSuchObjectError
 from .types import ColumnInfo, FunctionInfo, RelationInfo, SchemaRelationInfo
 
 __all__ = (
-    'get_all_table_acls',
-    'get_table_acl',
-    'get_all_column_acls',
-    'get_column_acls',
-    'get_all_sequence_acls',
-    'get_sequence_acl',
-    'get_all_function_acls',
-    'get_function_acl',
-    'get_all_language_acls',
-    'get_language_acl',
-    'get_all_schema_acls',
-    'get_schema_acl',
-    'get_all_database_acls',
-    'get_database_acl',
-    'get_all_tablespace_acls',
-    'get_tablespace_acl',
-    'get_all_type_acls',
-    'get_type_acl',
+    "get_all_table_acls",
+    "get_table_acl",
+    "get_all_column_acls",
+    "get_column_acls",
+    "get_all_sequence_acls",
+    "get_sequence_acl",
+    "get_all_function_acls",
+    "get_function_acl",
+    "get_all_language_acls",
+    "get_language_acl",
+    "get_all_schema_acls",
+    "get_schema_acl",
+    "get_all_database_acls",
+    "get_database_acl",
+    "get_all_tablespace_acls",
+    "get_tablespace_acl",
+    "get_all_type_acls",
+    "get_type_acl",
 )
 
 pg_table_is_visible = func.pg_catalog.pg_table_is_visible
@@ -38,100 +38,100 @@ canonical_type = func.pg_temp.pg_grant_canonical_type
 
 
 class PgRelKind(Enum):
-    TABLE = 'r'
-    INDEX = 'i'
-    SEQUENCE = 'S'
-    VIEW = 'v'
-    MATERIALIZED_VIEW = 'm'
-    COMPOSITE_TYPE = 'c'
-    TOAST_TABLE = 't'
-    FOREIGN_TABLE = 'f'
-    PARTITIONED_TABLE = 'p'  # PostgresSQL 10+
+    TABLE = "r"
+    INDEX = "i"
+    SEQUENCE = "S"
+    VIEW = "v"
+    MATERIALIZED_VIEW = "m"
+    COMPOSITE_TYPE = "c"
+    TOAST_TABLE = "t"
+    FOREIGN_TABLE = "f"
+    PARTITIONED_TABLE = "p"  # PostgresSQL 10+
 
 
 pg_class = table(
-    'pg_class',
-    column('oid'),
-    column('relname'),
-    column('relacl'),
-    column('relnamespace'),
-    column('relkind'),
-    column('relowner'),
+    "pg_class",
+    column("oid"),
+    column("relname"),
+    column("relacl"),
+    column("relnamespace"),
+    column("relkind"),
+    column("relowner"),
 )
 
 pg_namespace = table(
-    'pg_namespace',
-    column('oid'),
-    column('nspname'),
-    column('nspowner'),
-    column('nspacl'),
+    "pg_namespace",
+    column("oid"),
+    column("nspname"),
+    column("nspowner"),
+    column("nspacl"),
 )
 
 pg_roles = table(
-    'pg_roles',
-    column('oid'),
-    column('rolname'),
+    "pg_roles",
+    column("oid"),
+    column("rolname"),
 )
 
 pg_proc = table(
-    'pg_proc',
-    column('oid'),
-    column('proname'),
-    column('proargtypes'),
-    column('pronamespace'),
-    column('proacl'),
-    column('proowner'),
+    "pg_proc",
+    column("oid"),
+    column("proname"),
+    column("proargtypes"),
+    column("pronamespace"),
+    column("proacl"),
+    column("proowner"),
 )
 
 pg_type = table(
-    'pg_type',
-    column('oid'),
-    column('typname'),
-    column('typnamespace'),
-    column('typowner'),
-    column('typacl'),
+    "pg_type",
+    column("oid"),
+    column("typname"),
+    column("typnamespace"),
+    column("typowner"),
+    column("typacl"),
 )
 
 pg_language = table(
-    'pg_language',
-    column('oid'),
-    column('lanname'),
-    column('lanowner'),
-    column('lanacl'),
+    "pg_language",
+    column("oid"),
+    column("lanname"),
+    column("lanowner"),
+    column("lanacl"),
 )
 
 pg_database = table(
-    'pg_database',
-    column('oid'),
-    column('datname'),
-    column('datdba'),
-    column('datacl'),
+    "pg_database",
+    column("oid"),
+    column("datname"),
+    column("datdba"),
+    column("datacl"),
 )
 
 pg_tablespace = table(
-    'pg_tablespace',
-    column('oid'),
-    column('spcname'),
-    column('spcowner'),
-    column('spcacl'),
+    "pg_tablespace",
+    column("oid"),
+    column("spcname"),
+    column("spcowner"),
+    column("spcacl"),
 )
 
 pg_attribute = table(
-    'pg_attribute',
-    column('attrelid'),
-    column('attname'),
-    column('attnum'),
-    column('attisdropped'),
-    column('attacl'),
+    "pg_attribute",
+    column("attrelid"),
+    column("attname"),
+    column("attnum"),
+    column("attisdropped"),
+    column("attacl"),
 )
 
 _pg_class_stmt = (
     select(
         pg_class.c.oid,
-        pg_namespace.c.nspname.label('schema'),
-        pg_class.c.relname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_class.c.relacl, ARRAY(Text)).label('acl'),
+        pg_namespace.c.nspname.label("schema"),
+        pg_class.c.relname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_class.c.relacl, ARRAY(Text)).label("acl"),
     )
     .outerjoin(pg_namespace, pg_class.c.relnamespace == pg_namespace.c.oid)
     .outerjoin(pg_roles, pg_class.c.relowner == pg_roles.c.oid)
@@ -139,12 +139,12 @@ _pg_class_stmt = (
 
 _pg_attribute_stmt = (
     select(
-        pg_class.c.oid.label('table_oid'),
-        pg_namespace.c.nspname.label('schema'),
-        pg_class.c.relname.label('table'),
-        pg_attribute.c.attname.label('column'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_attribute.c.attacl, ARRAY(Text)).label('acl'),
+        pg_class.c.oid.label("table_oid"),
+        pg_namespace.c.nspname.label("schema"),
+        pg_class.c.relname.label("table"),
+        pg_attribute.c.attname.label("column"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_attribute.c.attacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_attribute)
     .join(pg_class, pg_attribute.c.attrelid == pg_class.c.oid)
@@ -152,18 +152,24 @@ _pg_attribute_stmt = (
     .outerjoin(pg_roles, pg_class.c.relowner == pg_roles.c.oid)
     .where(pg_attribute.c.attnum > 0)
     .where(~pg_attribute.c.attisdropped)
-    .where(pg_class.c.relkind.in_([
-        PgRelKind.TABLE.value,
-        PgRelKind.VIEW.value,
-        PgRelKind.MATERIALIZED_VIEW.value,
-        PgRelKind.PARTITIONED_TABLE.value,
-        PgRelKind.FOREIGN_TABLE.value,
-    ]))
+    .where(
+        pg_class.c.relkind.in_(
+            [
+                PgRelKind.TABLE.value,
+                PgRelKind.VIEW.value,
+                PgRelKind.MATERIALIZED_VIEW.value,
+                PgRelKind.PARTITIONED_TABLE.value,
+                PgRelKind.FOREIGN_TABLE.value,
+            ]
+        )
+    )
 )
 
-_upat = unnest(pg_proc.c.proargtypes).alias('upat')
+_upat = unnest(pg_proc.c.proargtypes).alias("upat")
 _pg_proc_argtypes = (
-    select(coalesce(array_agg(canonical_type(pg_type.c.typname)), cast([], ARRAY(Text))))
+    select(
+        coalesce(array_agg(canonical_type(pg_type.c.typname)), cast([], ARRAY(Text)))
+    )
     .join(_upat, _upat.column == pg_type.c.oid)
     .scalar_subquery()
 )
@@ -171,11 +177,11 @@ _pg_proc_argtypes = (
 _pg_proc_stmt = (
     select(
         pg_proc.c.oid,
-        pg_namespace.c.nspname.label('schema'),
-        pg_proc.c.proname.label('name'),
-        _pg_proc_argtypes.label('arg_types'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_proc.c.proacl, ARRAY(Text)).label('acl'),
+        pg_namespace.c.nspname.label("schema"),
+        pg_proc.c.proname.label("name"),
+        _pg_proc_argtypes.label("arg_types"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_proc.c.proacl, ARRAY(Text)).label("acl"),
     )
     .outerjoin(pg_namespace, pg_proc.c.pronamespace == pg_namespace.c.oid)
     .outerjoin(pg_roles, pg_proc.c.proowner == pg_roles.c.oid)
@@ -184,9 +190,9 @@ _pg_proc_stmt = (
 _pg_lang_stmt = (
     select(
         pg_language.c.oid,
-        pg_language.c.lanname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_language.c.lanacl, ARRAY(Text)).label('acl'),
+        pg_language.c.lanname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_language.c.lanacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_language)
     .outerjoin(pg_roles, pg_language.c.lanowner == pg_roles.c.oid)
@@ -195,9 +201,9 @@ _pg_lang_stmt = (
 _pg_schema_stmt = (
     select(
         pg_namespace.c.oid,
-        pg_namespace.c.nspname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_namespace.c.nspacl, ARRAY(Text)).label('acl'),
+        pg_namespace.c.nspname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_namespace.c.nspacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_namespace)
     .outerjoin(pg_roles, pg_namespace.c.nspowner == pg_roles.c.oid)
@@ -206,9 +212,9 @@ _pg_schema_stmt = (
 _pg_db_stmt = (
     select(
         pg_database.c.oid,
-        pg_database.c.datname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_database.c.datacl, ARRAY(Text)).label('acl'),
+        pg_database.c.datname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_database.c.datacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_database)
     .outerjoin(pg_roles, pg_database.c.datdba == pg_roles.c.oid)
@@ -217,9 +223,9 @@ _pg_db_stmt = (
 _pg_tablespace_stmt = (
     select(
         pg_tablespace.c.oid,
-        pg_tablespace.c.spcname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_tablespace.c.spcacl, ARRAY(Text)).label('acl'),
+        pg_tablespace.c.spcname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_tablespace.c.spcacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_tablespace)
     .outerjoin(pg_roles, pg_tablespace.c.spcowner == pg_roles.c.oid)
@@ -228,10 +234,10 @@ _pg_tablespace_stmt = (
 _pg_type_stmt = (
     select(
         pg_type.c.oid,
-        pg_namespace.c.nspname.label('schema'),
-        pg_type.c.typname.label('name'),
-        pg_roles.c.rolname.label('owner'),
-        cast(pg_type.c.typacl, ARRAY(Text)).label('acl'),
+        pg_namespace.c.nspname.label("schema"),
+        pg_type.c.typname.label("name"),
+        pg_roles.c.rolname.label("owner"),
+        cast(pg_type.c.typacl, ARRAY(Text)).label("acl"),
     )
     .select_from(pg_type)
     .outerjoin(pg_namespace, pg_type.c.typnamespace == pg_namespace.c.oid)
@@ -259,7 +265,8 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
 
     if (function_name is None) != (arg_types is None):
         raise TypeError(
-            'function_name and arg_types must both be specified')  # pragma: no cover
+            "function_name and arg_types must both be specified"
+        )  # pragma: no cover
 
     if schema is not None:
         stmt = stmt.where(pg_namespace.c.nspname == schema)
@@ -269,8 +276,8 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
 
         if arg_types:
             arg_types_sub = (
-                select(array_agg(canonical_type(column('typs'))))
-                .select_from(func.unnest(arg_types).alias('typs'))
+                select(array_agg(canonical_type(column("typs"))))
+                .select_from(func.unnest(arg_types).alias("typs"))
                 .scalar_subquery()
             )
         else:
@@ -299,20 +306,22 @@ def _filter_pg_type_stmt(schema=None, type_name=None):
 
 
 def _table_stmt(schema=None, table_name=None):
-    stmt = _filter_pg_class_stmt(
-        _pg_class_stmt, schema=schema, rel_name=table_name)
-    return stmt.where(pg_class.c.relkind.in_([
-        PgRelKind.TABLE.value,
-        PgRelKind.VIEW.value,
-        PgRelKind.MATERIALIZED_VIEW.value,
-        PgRelKind.PARTITIONED_TABLE.value,
-        PgRelKind.FOREIGN_TABLE.value,
-    ]))
+    stmt = _filter_pg_class_stmt(_pg_class_stmt, schema=schema, rel_name=table_name)
+    return stmt.where(
+        pg_class.c.relkind.in_(
+            [
+                PgRelKind.TABLE.value,
+                PgRelKind.VIEW.value,
+                PgRelKind.MATERIALIZED_VIEW.value,
+                PgRelKind.PARTITIONED_TABLE.value,
+                PgRelKind.FOREIGN_TABLE.value,
+            ]
+        )
+    )
 
 
 def _sequence_stmt(schema=None, sequence_name=None):
-    stmt = _filter_pg_class_stmt(
-        _pg_class_stmt, schema=schema, rel_name=sequence_name)
+    stmt = _filter_pg_class_stmt(_pg_class_stmt, schema=schema, rel_name=sequence_name)
     return stmt.where(pg_class.c.relkind == PgRelKind.SEQUENCE.value)
 
 
@@ -369,8 +378,7 @@ def get_column_acls(conn, table_name, schema=None):
     Returns:
          List of :class:`~.types.ColumnInfo` objects.
     """
-    stmt = _filter_pg_class_stmt(
-        _pg_attribute_stmt, schema=schema, rel_name=table_name)
+    stmt = _filter_pg_class_stmt(_pg_attribute_stmt, schema=schema, rel_name=table_name)
     rows = conn.execute(stmt).mappings().all()
     if not rows:
         raise NoSuchObjectError(table_name)
@@ -408,7 +416,8 @@ def _make_canonical_type_function(conn):
     E.g. casting the 'any' type fails. Normal examples include 'int4' -> 'integer'
     """
     # pg_temp is per-connection
-    stmt = text("""
+    stmt = text(
+        """
         CREATE OR REPLACE FUNCTION pg_temp.pg_grant_canonical_type(typname text)
         RETURNS text AS $$
         BEGIN
@@ -422,7 +431,8 @@ def _make_canonical_type_function(conn):
         LANGUAGE plpgsql
         STABLE
         RETURNS NULL ON NULL INPUT;
-    """)
+    """
+    )
     conn.execute(stmt)
 
 
@@ -449,7 +459,7 @@ def get_function_acl(conn, function_name, arg_types: Sequence[str], schema=None)
     _make_canonical_type_function(conn)
 
     if (function_name is None) != (arg_types is None):
-        raise TypeError('function_name and arg_types must both be specified')
+        raise TypeError("function_name and arg_types must both be specified")
 
     if not isinstance(arg_types, Sequence) or isinstance(arg_types, str):
         raise TypeError("arg_types should be a sequence of strings, e.g. ['text']")

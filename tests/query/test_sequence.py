@@ -5,30 +5,33 @@ from pg_grant.query import get_all_sequence_acls, get_sequence_acl
 
 
 expected_acls = {
-    'public': {
+    "public": {
         # seq1 has default privileges, so None is returned.
-        'seq1': None,
+        "seq1": None,
         # alice is owner, bob was granted all
-        'seq2': ['alice=rwU/alice', 'bob=rwU/alice'],
+        "seq2": ["alice=rwU/alice", "bob=rwU/alice"],
     },
-    'schema1': {
-        'seq3': None,
-    }
+    "schema1": {
+        "seq3": None,
+    },
 }
 
 
-@pytest.mark.parametrize('name, acls', expected_acls['public'].items())
+@pytest.mark.parametrize("name, acls", expected_acls["public"].items())
 def test_get_sequence_acl_visible(connection, name, acls):
     """Find visible (i.e. in search path) sequences matching ``name``."""
     sequence = get_sequence_acl(connection, name)
     assert sequence.acl == acls
 
 
-@pytest.mark.parametrize('schema, name, acls', [
-    (schema, seq, acl)
-    for schema, d in expected_acls.items()
-    for seq, acl in d.items()
-])
+@pytest.mark.parametrize(
+    "schema, name, acls",
+    [
+        (schema, seq, acl)
+        for schema, d in expected_acls.items()
+        for seq, acl in d.items()
+    ],
+)
 def test_get_sequence_acl_schema(connection, schema, name, acls):
     """Find sequences  from ``schema`` matching ``name``."""
     sequence = get_sequence_acl(connection, name, schema)
@@ -38,7 +41,7 @@ def test_get_sequence_acl_schema(connection, schema, name, acls):
 def test_get_all_sequence_acls(connection):
     """Get all sequences in all schemas."""
     sequences = get_all_sequence_acls(connection)
-    assert {x.schema for x in sequences} == {'public', 'schema1'}
+    assert {x.schema for x in sequences} == {"public", "schema1"}
 
     tested = 0
 
@@ -57,4 +60,4 @@ def test_get_all_sequence_acls(connection):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_sequence_acl(connection, 'seq3')
+        get_sequence_acl(connection, "seq3")

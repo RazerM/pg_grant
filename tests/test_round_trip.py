@@ -6,8 +6,11 @@ from plumbum.cmd import pg_dump
 
 from pg_grant import parse_acl_item, FunctionInfo, PgObjectType
 from pg_grant.query import (
-    get_all_function_acls, get_all_sequence_acls, get_all_table_acls,
-    get_all_type_acls)
+    get_all_function_acls,
+    get_all_sequence_acls,
+    get_all_table_acls,
+    get_all_type_acls,
+)
 
 
 def _priv_acls(conn, acls, type_, revoke):
@@ -22,10 +25,12 @@ def _priv_acls(conn, acls, type_, revoke):
 
                 if revoke:
                     statements = parsed.as_revoke_statements(
-                        type_, obj.name, schema=obj.schema, arg_types=arg_types)
+                        type_, obj.name, schema=obj.schema, arg_types=arg_types
+                    )
                 else:
                     statements = parsed.as_grant_statements(
-                        type_, obj.name, schema=obj.schema, arg_types=arg_types)
+                        type_, obj.name, schema=obj.schema, arg_types=arg_types
+                    )
 
                 for stmt in statements:
                     conn.execute(stmt)
@@ -41,19 +46,22 @@ grant_function_acls = partial(_priv_acls, type_=PgObjectType.FUNCTION, revoke=Fa
 revoke_function_acls = partial(_priv_acls, type_=PgObjectType.FUNCTION, revoke=True)
 
 
-@pytest.mark.parametrize('get, revoke, grant', [
-    (get_all_table_acls, revoke_table_acls, grant_table_acls),
-    (get_all_sequence_acls, revoke_sequence_acls, grant_sequence_acls),
-    (get_all_type_acls, revoke_type_acls, grant_type_acls),
-    (get_all_function_acls, revoke_function_acls, grant_function_acls),
-])
+@pytest.mark.parametrize(
+    "get, revoke, grant",
+    [
+        (get_all_table_acls, revoke_table_acls, grant_table_acls),
+        (get_all_sequence_acls, revoke_sequence_acls, grant_sequence_acls),
+        (get_all_type_acls, revoke_type_acls, grant_type_acls),
+        (get_all_function_acls, revoke_function_acls, grant_function_acls),
+    ],
+)
 def test_revoke_grant_schema_relations(connection, postgres_url, get, revoke, grant):
-    cmd = pg_dump['--schema-only', postgres_url]
+    cmd = pg_dump["--schema-only", postgres_url]
 
     try:
         code, dump1, err = cmd.run()
     except ProcessExecutionError as exc:
-        if 'server version mismatch' in exc.stderr:
+        if "server version mismatch" in exc.stderr:
             pytest.skip("pg_dump is older than server version")
         else:
             raise
@@ -61,7 +69,7 @@ def test_revoke_grant_schema_relations(connection, postgres_url, get, revoke, gr
     assert code == 0
 
     with connection.begin():
-        acls = get(connection, 'public')
+        acls = get(connection, "public")
         revoke(connection, acls)
 
     code, dump2, _ = cmd.run()

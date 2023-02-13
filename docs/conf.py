@@ -42,12 +42,12 @@ html_static_path = []
 
 # intersphinx
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'psycopg2': ('https://www.psycopg.org/docs/', None),
+    "python": ("https://docs.python.org/3", None),
+    "psycopg2": ("https://www.psycopg.org/docs/", None),
 }
 
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 napoleon_numpy_docstring = False
 
-inheritance_graph_attrs = dict(bgcolor='transparent')
+inheritance_graph_attrs = dict(bgcolor="transparent")
