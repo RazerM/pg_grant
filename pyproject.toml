@@ -29,3 +29,9 @@ pep8test = ["flake8", "pep8-naming"]
 [project.urls]
 Documentation = "https://pg-grant.readthedocs.io"
 "Source Code" = "https://github.com/RazerM/pg_grant"
+
+[tool.pytest.ini_options]
+addopts = "-r s"
+
+[tool.doc8]
+ignore-path = "docs/_build/"
