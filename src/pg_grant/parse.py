@@ -174,14 +174,14 @@ def parse_acl_item(
             if priv[pos + 1:pos + 2] == '*':
                 s = keyword
                 if subname is not None:
-                    s += ' ({})'.format(subname)
+                    s += f' ({subname})'
 
                 privs_with_grant_option.append(s)
                 all_without_grant_option = False
             else:
                 s = keyword
                 if subname is not None:
-                    s += ' ({})'.format(subname)
+                    s += f' ({subname})'
 
                 privs.append(s)
                 all_with_grant_option = False
@@ -245,7 +245,7 @@ def parse_acl_item(
         convert_priv('r', 'SELECT')
         convert_priv('w', 'UPDATE')
     else:
-        raise ValueError('Unknown type: {}'.format(type))
+        raise ValueError(f'Unknown type: {type}')
 
     if all_with_grant_option:
         privs = []
@@ -253,7 +253,7 @@ def parse_acl_item(
         s = 'ALL'
 
         if subname is not None:
-            s += ' ({})'.format(subname)
+            s += f' ({subname})'
 
         privs_with_grant_option.append(s)
     elif all_without_grant_option:
@@ -262,7 +262,7 @@ def parse_acl_item(
         s = 'ALL'
 
         if subname is not None:
-            s += ' ({})'.format(subname)
+            s += f' ({subname})'
 
         privs.append(s)
 

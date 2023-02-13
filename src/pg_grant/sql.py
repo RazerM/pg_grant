@@ -87,7 +87,7 @@ def _pg_grant(element, compiler, **kw):
     for priv in element.privileges:
         match = _re_valid_priv.match(priv)
         if match is None:
-            raise ValueError('Privilege not valid: {}'.format(priv))
+            raise ValueError(f'Privilege not valid: {priv}')
 
         subname = match.group(2)
 
@@ -95,7 +95,7 @@ def _pg_grant(element, compiler, **kw):
             if element.quote_subname:
                 subname = preparer.quote(subname)
 
-            privs.append('{} ({})'.format(match.group(1), subname))
+            privs.append(f'{match.group(1)} ({subname})')
         else:
             privs.append(match.group(1))
 
@@ -139,14 +139,14 @@ def _pg_grant(element, compiler, **kw):
                                  'no arguments, not None.')
 
             str_arg_types = ', '.join([preparer.quote(t) for t in arg_types])
-            target = '{}({})'.format(str_target, str_arg_types)
+            target = f'{str_target}({str_arg_types})'
     elif isinstance(priv_type, PgObjectType):
         if str_target is None:
             target = compiler.process(target)
         else:
             target = str_target
     else:
-        raise ValueError('Unknown type: {}'.format(priv_type))
+        raise ValueError(f'Unknown type: {priv_type}')
 
     is_grant = element.keyword == 'GRANT'
 
