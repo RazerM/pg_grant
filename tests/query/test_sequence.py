@@ -3,7 +3,6 @@ import pytest
 from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_sequence_acls, get_sequence_acl
 
-
 expected_acls = {
     "public": {
         # seq1 has default privileges, so None is returned.

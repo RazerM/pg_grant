@@ -4,8 +4,8 @@ from itertools import chain
 from pathlib import Path
 
 import psycopg2
-from psycopg2 import sql
 import pytest
+from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url

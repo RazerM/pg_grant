@@ -1,6 +1,6 @@
 from typing import List, Optional, Sequence
 
-from .types import Privileges, PgObjectType
+from .types import PgObjectType, Privileges
 
 
 def _get_acl_username(acl):

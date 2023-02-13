@@ -3,7 +3,6 @@ import pytest
 from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_type_acls, get_type_acl
 
-
 expected_acls = {
     "public": {
         # bug_status has default privileges, so None is returned.

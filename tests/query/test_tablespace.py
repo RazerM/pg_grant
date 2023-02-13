@@ -3,7 +3,6 @@ import pytest
 from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_tablespace_acls, get_tablespace_acl
 
-
 expected_acls = {
     # pg_default has default privileges, so None is returned.
     "pg_default": None,

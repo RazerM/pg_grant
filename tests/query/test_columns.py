@@ -3,7 +3,6 @@ import pytest
 from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_column_acls, get_column_acls
 
-
 expected_acls = {
     "public": {
         "table1": {

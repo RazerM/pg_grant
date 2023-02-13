@@ -4,7 +4,7 @@ import pytest
 from plumbum import ProcessExecutionError
 from plumbum.cmd import pg_dump
 
-from pg_grant import parse_acl_item, FunctionInfo, PgObjectType
+from pg_grant import FunctionInfo, PgObjectType, parse_acl_item
 from pg_grant.query import (
     get_all_function_acls,
     get_all_sequence_acls,

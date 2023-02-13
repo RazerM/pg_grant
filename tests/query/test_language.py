@@ -3,7 +3,6 @@ import pytest
 from pg_grant import NoSuchObjectError
 from pg_grant.query import get_all_language_acls, get_language_acl
 
-
 expected_acls = {
     # sql has default privileges, so None is returned.
     "sql": None,

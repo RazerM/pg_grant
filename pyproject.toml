@@ -36,3 +36,7 @@ addopts = "-r s"
 
 [tool.doc8]
 ignore-path = "docs/_build/"
+
+[tool.isort]
+profile = "black"
+known_first_party = ["pg_grant"]
