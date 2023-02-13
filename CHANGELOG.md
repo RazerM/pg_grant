@@ -1,7 +1,15 @@
 # Change Log
 
 ## [Unreleased][unreleased]
-N/A
+### Changed
+- Python 3.7 or later is required.
+### Removed
+- `pg_grant.__version__`, use `importlib.metadata` instead.
+- `pg_grant.__description__`, use `importlib.metadata` instead.
+- `pg_grant.__license__`, use `importlib.metadata` instead.
+- `pg_grant.__author__`, use `importlib.metadata` instead.
+- `pg_grant.__email__`, use `importlib.metadata` instead.
+
 
 ## [0.4.0][]
 

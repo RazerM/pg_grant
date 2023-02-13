@@ -1,4 +1,3 @@
 -e .[sqlalchemy,test]
-bumpversion
 invoke
 twine

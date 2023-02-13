@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pg_grant"
+version = "0.4.0"
+description = "Parse PostgreSQL privileges"
+readme = "README.rst"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+authors = [
+    { name = "Frazer McLean", email = "frazer@frazermclean.co.uk" },
+]
+keywords = ["postgres", "acl", "grant", "revoke"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = ["attrs"]
+
+[project.optional-dependencies]
+sqlalchemy = ["sqlalchemy[postgresql]>=1.4"]
+test = ["plumbum", "pytest"]
+docstest = ["doc8", "sphinx", "sphinx_rtd_theme"]
+pep8test = ["flake8", "pep8-naming"]
+
+[project.urls]
+Documentation = "https://pg-grant.readthedocs.io"
+"Source Code" = "https://github.com/RazerM/pg_grant"
