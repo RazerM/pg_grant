@@ -27,10 +27,6 @@ def _as_table(element):
 
 
 class _GrantRevoke(Executable, ClauseElement):
-    _execution_options = Executable._execution_options.union({
-        'autocommit': True
-    })
-
     valid_privileges = {
         'SELECT',
         'UPDATE',
@@ -66,10 +62,14 @@ class _GrantRevoke(Executable, ClauseElement):
 
 
 class _Grant(_GrantRevoke):
+    inherit_cache = False
+
     keyword = 'GRANT'
 
 
 class _Revoke(_GrantRevoke):
+    inherit_cache = False
+
     keyword = 'REVOKE'
 
 
