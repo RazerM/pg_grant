@@ -45,15 +45,13 @@ Documentation
 ~~~~~~~~~~~~~
 
 For in-depth information, `visit the
-documentation <http://pg_grant.readthedocs.org/en/latest/>`__!
+documentation <https://pg-grant.readthedocs.org/en/latest/>`__!
 
 Development
 ~~~~~~~~~~~
 
 pg_grant uses `semantic versioning <http://semver.org>`__
 
-.. |Travis| image:: http://img.shields.io/travis/RazerM/pg_grant/master.svg?style=flat-square&label=Travis
-    :target: https://travis-ci.org/RazerM/pg_grant
 .. |PyPI Version| image:: http://img.shields.io/pypi/v/pg_grant.svg?style=flat-square&label=PyPI
     :target: https://pypi.python.org/pypi/pg_grant/
 .. |Python Version| image:: https://img.shields.io/badge/Python-3-brightgreen.svg?style=flat-square
@@ -65,4 +63,4 @@ pg_grant uses `semantic versioning <http://semver.org>`__
 .. |Coverage| image:: https://img.shields.io/codecov/c/github/RazerM/pg_grant/master.svg?style=flat-square
     :target: https://codecov.io/github/RazerM/pg_grant?branch=master
 .. |Documentation| image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat-square
-    :target: http://pg_grant.readthedocs.org/en/latest/
+    :target: https://pg-grant.readthedocs.org/en/latest/
