@@ -1,7 +1,7 @@
 pg_grant
 -------------
 
-|PyPI Version| |Documentation| |Travis| |Coverage| |Python Version| |PostgreSQL Version| |License|
+|PyPI Version| |Documentation| |Coverage| |Python Version| |PostgreSQL Version| |License|
 
 ``pg_grant`` is a Python module for parsing, querying, and updating PostgreSQL
 privileges.
