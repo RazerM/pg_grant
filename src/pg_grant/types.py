@@ -5,18 +5,19 @@ import attr
 
 class PgObjectType(Enum):
     """PostgreSQL object type."""
-    TABLE = 'TABLE'
-    SEQUENCE = 'SEQUENCE'
-    FUNCTION = 'FUNCTION'
-    LANGUAGE = 'LANGUAGE'
-    SCHEMA = 'SCHEMA'
-    DATABASE = 'DATABASE'
-    TABLESPACE = 'TABLESPACE'
-    TYPE = 'TYPE'
-    FOREIGN_DATA_WRAPPER = 'FOREIGN DATA WRAPPER'
-    FOREIGN_SERVER = 'FOREIGN SERVER'
-    FOREIGN_TABLE = 'FOREIGN TABLE'
-    LARGE_OBJECT = 'LARGE OBJECT'
+
+    TABLE = "TABLE"
+    SEQUENCE = "SEQUENCE"
+    FUNCTION = "FUNCTION"
+    LANGUAGE = "LANGUAGE"
+    SCHEMA = "SCHEMA"
+    DATABASE = "DATABASE"
+    TABLESPACE = "TABLESPACE"
+    TYPE = "TYPE"
+    FOREIGN_DATA_WRAPPER = "FOREIGN DATA WRAPPER"
+    FOREIGN_SERVER = "FOREIGN SERVER"
+    FOREIGN_TABLE = "FOREIGN TABLE"
+    LARGE_OBJECT = "LARGE OBJECT"
 
 
 @attr.s(slots=True)
@@ -25,6 +26,7 @@ class Privileges:
 
     .. seealso:: :func:`~.parse.parse_acl_item`
     """
+
     grantee = attr.ib()
     grantor = attr.ib()
     privs = attr.ib(factory=list)
@@ -42,13 +44,19 @@ class Privileges:
         statements = []
 
         if self.privs:
-            statements.append(
-                grant(self.privs, type_, target, self.grantee, **kwargs))
+            statements.append(grant(self.privs, type_, target, self.grantee, **kwargs))
 
         if self.privswgo:
-            statements.append(grant(
-                self.privswgo, type_, target, self.grantee, grant_option=True,
-                **kwargs))
+            statements.append(
+                grant(
+                    self.privswgo,
+                    type_,
+                    target,
+                    self.grantee,
+                    grant_option=True,
+                    **kwargs,
+                )
+            )
 
         return statements
 
@@ -69,12 +77,12 @@ class Privileges:
         statements = []
 
         if self.privs:
-            statements.append(
-                revoke(self.privs, type_, target, self.grantee, **kwargs))
+            statements.append(revoke(self.privs, type_, target, self.grantee, **kwargs))
 
         if self.privswgo:
-            statements.append(revoke(
-                self.privswgo, type_, target, self.grantee, **kwargs))
+            statements.append(
+                revoke(self.privswgo, type_, target, self.grantee, **kwargs)
+            )
 
         return statements
 
@@ -83,6 +91,7 @@ class Privileges:
 class RelationInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
+
     #: Row identifier.
     oid = attr.ib()
 
@@ -100,6 +109,7 @@ class RelationInfo:
 class SchemaRelationInfo(RelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
+
     #: The name of the schema that contains this relation.
     schema = attr.ib()
 
@@ -108,6 +118,7 @@ class SchemaRelationInfo(RelationInfo):
 class FunctionInfo(SchemaRelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
+
     #: Data types of the function arguments.
     arg_types = attr.ib()
 
@@ -116,6 +127,7 @@ class FunctionInfo(SchemaRelationInfo):
 class ColumnInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
+
     #: Table identifier.
     table_oid = attr.ib()
 

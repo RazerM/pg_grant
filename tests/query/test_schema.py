@@ -17,17 +17,20 @@ def expected_acls(connection, request):
         return {
             # pg_database_owner is owner, public get usage on the public schema
             # by default
-            'public': ['pg_database_owner=UC/pg_database_owner', '=U/pg_database_owner'],
+            "public": [
+                "pg_database_owner=UC/pg_database_owner",
+                "=U/pg_database_owner",
+            ],
             # schema1 has default privileges, so None is returned.
-            'schema1': None,
+            "schema1": None,
         }
     else:
         return {
             # postgres is owner, public get access to the public schema by
             # default
-            'public': ['postgres=UC/postgres', '=UC/postgres'],
+            "public": ["postgres=UC/postgres", "=UC/postgres"],
             # schema1 has default privileges, so None is returned.
-            'schema1': None,
+            "schema1": None,
         }
 
 
@@ -49,4 +52,4 @@ def test_get_all_schema_acls(connection, expected_acls):
 
 def test_no_such_object(connection):
     with pytest.raises(NoSuchObjectError):
-        get_schema_acl(connection, 'schema2')
+        get_schema_acl(connection, "schema2")

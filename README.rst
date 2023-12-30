@@ -18,21 +18,23 @@ Without the SQLAlchemy extra, ``pg_grant`` can only parse access privileges.
 Example
 ~~~~~~~
 
-.. code:: python
+.. code:: pycon
 
     >>> from pg_grant import parse_acl_item
-    >>> parse_acl_item('bob=arw*/alice')
+    >>> parse_acl_item("bob=arw*/alice")
     Privileges(grantee='bob', grantor='alice', privs=['SELECT', 'INSERT'], privswgo=['UPDATE'])
 
     >>> from sqlalchemy import create_engine
     >>> from pg_grant.query import get_table_acl
-    >>> engine = create_engine('postgresql://...')
-    >>> get_table_acl(engine, 'table2')
+    >>> engine = create_engine("postgresql://...")
+    >>> with engine.connect() as conn:
+    ...     get_table_acl(conn, "table2")
+    ...
     SchemaRelationInfo(oid=138067, name='table2', owner='alice', acl=['alice=arwdDxt/alice', 'bob=arwdDxt/alice'], schema='public')
 
     >>> from pg_grant import PgObjectType
     >>> from pg_grant.sql import revoke
-    >>> stmt = revoke(['SELECT'], PgObjectType.TABLE, 'table2', 'bob')
+    >>> stmt = revoke(["SELECT"], PgObjectType.TABLE, "table2", "bob")
     >>> str(stmt)
     'REVOKE SELECT ON TABLE table2 FROM bob'
     >>> engine.execute(stmt)

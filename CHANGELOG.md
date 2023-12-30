@@ -1,7 +1,18 @@
 # Change Log
 
 ## [Unreleased][unreleased]
-N/A
+
+### Changed
+
+- Python 3.7 or later is required.
+
+### Removed
+
+- `pg_grant.__version__`, use `importlib.metadata` instead.
+- `pg_grant.__description__`, use `importlib.metadata` instead.
+- `pg_grant.__license__`, use `importlib.metadata` instead.
+- `pg_grant.__author__`, use `importlib.metadata` instead.
+- `pg_grant.__email__`, use `importlib.metadata` instead.
 
 ## [0.4.0][]
 
@@ -9,6 +20,7 @@ N/A
 SQLAlchemy 2.0 or later**
 
 ## Changed
+
 - Python 3.6 or later is required.
 
 ## [0.3.3][]
@@ -17,26 +29,34 @@ SQLAlchemy 2.0 or later**
 SQLAlchemy 1.4 or later**
 
 ### Fixed
+
 - ACLs for functions without any arguments (i.e. `arg_types=()`) could not be
-  queried using `get_function_acl`. 
+  queried using `get_function_acl`.
 
 ## [0.3.2][] - 2020-05-21
+
 ### Fixed
+
 - Type annotations for `parse_acl` and `parse_acl_item`.
 
 ## [0.3.1][] - 2018-01-17
+
 ### Fixed
+
 - `pg_grant` can be installed with setuptools v38.0+, which requires
   `install_requires` in `setup.py` to be ordered.
 
 ## [0.3.0][] - 2017-10-31
+
 ### Added
+
 - `parse_acl` function to call `parse_acl_item` on each item in a list.
 - Documentation on `parse_acl_item` about ensuring `subname` is a valid
   identifier if it is to be executed.
 - `get_all_column_acls` and `get_column_acls` to get column ACLs.
 
 ### Changed
+
 - Renamed singular functions like `get_table_acls` to `get_table_acl`.
 - `get_all_table_acls` and `get_table_acl` also return views, materialized
   views, partitioned tables (PostgreSQL 10+), and foreign tables.
