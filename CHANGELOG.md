@@ -4,9 +4,16 @@
 
 **This release supports SQLAlchemy 2.0 or later**
 
+### Added
+
+- `get_all_parameter_acls`
+- `get_parameter_acl`
+- `PgOjectType.DOMAIN`
+- `PgOjectType.PARAMETER`
+
 ### Changed
 
-- Python 3.7 or later is required.
+- Python 3.8 or later is required.
 - The following arguments for `grant` and `revoke` are now keyword-only:
   - `grant_option`
   - `schema`
