@@ -416,7 +416,7 @@ def get_table_acl(
          :class:`~.types.SchemaRelationInfo`
     """
     stmt = _table_stmt(schema=schema, table_name=name)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(name)
     return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -484,7 +484,7 @@ def get_sequence_acl(
          :class:`~.types.SchemaRelationInfo`
     """
     stmt = _sequence_stmt(schema=schema, sequence_name=sequence)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(sequence)
     return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -556,7 +556,7 @@ def get_function_acl(
         raise TypeError("arg_types should be a sequence of strings, e.g. ['text']")
 
     stmt = _filter_pg_proc_stmt(schema, function_name, arg_types)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(function_name)
     return FunctionInfo(**t.cast("Mapping[str, Any]", row))
@@ -579,7 +579,7 @@ def get_language_acl(conn: Connectable, language: str) -> RelationInfo:
          :class:`~.types.RelationInfo`
     """
     stmt = _pg_lang_stmt.where(pg_language.c.lanname == language)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(language)
     return RelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -602,7 +602,7 @@ def get_schema_acl(conn: Connectable, schema: str) -> RelationInfo:
          :class:`~.types.RelationInfo`
     """
     stmt = _pg_schema_stmt.where(pg_namespace.c.nspname == schema)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(schema)
     return RelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -625,7 +625,7 @@ def get_database_acl(conn: Connectable, database: str) -> RelationInfo:
          :class:`~.types.RelationInfo`
     """
     stmt = _pg_db_stmt.where(pg_database.c.datname == database)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(database)
     return RelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -648,7 +648,7 @@ def get_tablespace_acl(conn: Connectable, tablespace: str) -> RelationInfo:
          :class:`~.types.RelationInfo`
     """
     stmt = _pg_tablespace_stmt.where(pg_tablespace.c.spcname == tablespace)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(tablespace)
     return RelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -678,7 +678,7 @@ def get_type_acl(
          :class:`~.types.SchemaRelationInfo`
     """
     stmt = _filter_pg_type_stmt(schema=schema, type_name=type_name)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         raise NoSuchObjectError(type_name)
     return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
@@ -704,7 +704,7 @@ def get_parameter_acl(conn: Connectable, parameter: str) -> Optional[ParameterIn
         non-default privileges, otherwise ``None``.
     """
     stmt = _pg_parameter_stmt.where(pg_parameter_acl.c.parname == parameter)
-    row = conn.execute(stmt).mappings().first()
+    row = conn.execute(stmt).mappings().one_or_none()
     if row is None:
         return None
     return ParameterInfo(**t.cast("Mapping[str, Any]", row))
