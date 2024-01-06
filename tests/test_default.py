@@ -14,10 +14,12 @@ from pg_grant import PgObjectType, Privileges, get_default_privileges
         (PgObjectType.DATABASE, ["CONNECT", "TEMPORARY"]),
         (PgObjectType.TABLESPACE, None),
         (PgObjectType.TYPE, ["USAGE"]),
+        (PgObjectType.DOMAIN, ["USAGE"]),
         (PgObjectType.FOREIGN_DATA_WRAPPER, None),
         (PgObjectType.FOREIGN_SERVER, None),
         (PgObjectType.FOREIGN_TABLE, None),
         (PgObjectType.LARGE_OBJECT, None),
+        (PgObjectType.PARAMETER, None),
     ],
 )
 def test_default_privileges(type, public_priv):

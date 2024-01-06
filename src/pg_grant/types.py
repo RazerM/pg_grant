@@ -1,4 +1,3 @@
-import sys
 from enum import Enum
 from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Tuple, overload
 
@@ -17,10 +16,7 @@ except ImportError:
 else:
     HAVE_SQLALCHEMY = True
 
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import Literal
 
 
 class PgObjectType(Enum):
@@ -34,10 +30,12 @@ class PgObjectType(Enum):
     DATABASE = "DATABASE"
     TABLESPACE = "TABLESPACE"
     TYPE = "TYPE"
+    DOMAIN = "DOMAIN"
     FOREIGN_DATA_WRAPPER = "FOREIGN DATA WRAPPER"
     FOREIGN_SERVER = "FOREIGN SERVER"
     FOREIGN_TABLE = "FOREIGN TABLE"
     LARGE_OBJECT = "LARGE OBJECT"
+    PARAMETER = "PARAMETER"
 
 
 @define
@@ -299,7 +297,7 @@ class Privileges:
             raise RuntimeError("Missing sqlalchemy extra")
 
 
-@define
+@define(kw_only=True)
 class RelationInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -317,7 +315,7 @@ class RelationInfo:
     acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
 
 
-@define
+@define(kw_only=True)
 class SchemaRelationInfo(RelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -326,7 +324,7 @@ class SchemaRelationInfo(RelationInfo):
     schema: str
 
 
-@define
+@define(kw_only=True)
 class FunctionInfo(SchemaRelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -335,7 +333,7 @@ class FunctionInfo(SchemaRelationInfo):
     arg_types: Tuple[str, ...] = field(converter=tuple)
 
 
-@define
+@define(kw_only=True)
 class ColumnInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -356,4 +354,19 @@ class ColumnInfo:
     owner: str
 
     #: Column access control list.
+    acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
+
+
+@define(kw_only=True)
+class ParameterInfo:
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+
+    #: Row identifier.
+    oid: int
+
+    #: Name of the table, sequence, etc.
+    name: str
+
+    #: Access control list.
     acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))

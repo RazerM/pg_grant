@@ -11,11 +11,25 @@ parse_data = [
         [],
     ),
     (
+        "alice=sA/alice",
+        "alice",
+        "alice",
+        ["SET", "ALTER SYSTEM"],
+        [],
+    ),
+    (
         "alice=a*r*w*d*D*x*t*/alice",
         "alice",
         "alice",
         [],
         ["SELECT", "UPDATE", "INSERT", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"],
+    ),
+    (
+        "alice=s*A*/alice",
+        "alice",
+        "alice",
+        [],
+        ["SET", "ALTER SYSTEM"],
     ),
     (
         "bob=arwdDxt/alice",
@@ -45,6 +59,8 @@ parse_data = [
     ("bob=C/alice", "bob", "alice", ["CREATE"], []),
     ("bob=c/alice", "bob", "alice", ["CONNECT"], []),
     ("bob=T/alice", "bob", "alice", ["TEMPORARY"], []),
+    ("bob=s/alice", "bob", "alice", ["SET"], []),
+    ("bob=A/alice", "bob", "alice", ["ALTER SYSTEM"], []),
     ("bob=a*/alice", "bob", "alice", [], ["INSERT"]),
     ("bob=r*/alice", "bob", "alice", [], ["SELECT"]),
     ("bob=w*/alice", "bob", "alice", [], ["UPDATE"]),
@@ -57,6 +73,8 @@ parse_data = [
     ("bob=C*/alice", "bob", "alice", [], ["CREATE"]),
     ("bob=c*/alice", "bob", "alice", [], ["CONNECT"]),
     ("bob=T*/alice", "bob", "alice", [], ["TEMPORARY"]),
+    ("bob=s*/alice", "bob", "alice", [], ["SET"]),
+    ("bob=A*/alice", "bob", "alice", [], ["ALTER SYSTEM"]),
 ]
 
 parse_table_data = [
@@ -82,6 +100,8 @@ parse_table_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], ["INSERT"]),
     ("bob=r*/alice", "bob", "alice", [], ["SELECT"]),
     ("bob=w*/alice", "bob", "alice", [], ["UPDATE"]),
@@ -94,6 +114,8 @@ parse_table_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_sequence_data = [
@@ -113,6 +135,8 @@ parse_sequence_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], ["SELECT"]),
     ("bob=w*/alice", "bob", "alice", [], ["UPDATE"]),
@@ -125,6 +149,8 @@ parse_sequence_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_function_data = [
@@ -143,6 +169,8 @@ parse_function_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], []),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -155,6 +183,8 @@ parse_function_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_language_data = [
@@ -173,6 +203,8 @@ parse_language_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], []),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -185,6 +217,8 @@ parse_language_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_schema_data = [
@@ -204,6 +238,8 @@ parse_schema_data = [
     ("bob=C/alice", "bob", "alice", ["CREATE"], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], []),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -216,6 +252,8 @@ parse_schema_data = [
     ("bob=C*/alice", "bob", "alice", [], ["CREATE"]),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_database_data = [
@@ -235,6 +273,8 @@ parse_database_data = [
     ("bob=C/alice", "bob", "alice", ["CREATE"], []),
     ("bob=c/alice", "bob", "alice", ["CONNECT"], []),
     ("bob=T/alice", "bob", "alice", ["TEMPORARY"], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], []),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -247,6 +287,8 @@ parse_database_data = [
     ("bob=C*/alice", "bob", "alice", [], ["CREATE"]),
     ("bob=c*/alice", "bob", "alice", [], ["CONNECT"]),
     ("bob=T*/alice", "bob", "alice", [], ["TEMPORARY"]),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_tablespace_data = [
@@ -265,6 +307,8 @@ parse_tablespace_data = [
     ("bob=C/alice", "bob", "alice", ["ALL"], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], []),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -277,6 +321,8 @@ parse_tablespace_data = [
     ("bob=C*/alice", "bob", "alice", [], ["ALL"]),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_type_data = parse_language_data
@@ -299,6 +345,8 @@ parse_foreign_table_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], ["ALL"]),
     ("bob=w*/alice", "bob", "alice", [], []),
@@ -311,6 +359,8 @@ parse_foreign_table_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_lob_data = [
@@ -330,6 +380,8 @@ parse_lob_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], []),
     ("bob=r*/alice", "bob", "alice", [], ["SELECT"]),
     ("bob=w*/alice", "bob", "alice", [], ["UPDATE"]),
@@ -342,6 +394,8 @@ parse_lob_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
 ]
 
 parse_col_data = [
@@ -367,6 +421,8 @@ parse_col_data = [
     ("bob=C/alice", "bob", "alice", [], []),
     ("bob=c/alice", "bob", "alice", [], []),
     ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", [], []),
+    ("bob=A/alice", "bob", "alice", [], []),
     ("bob=a*/alice", "bob", "alice", [], ["INSERT (id)"]),
     ("bob=r*/alice", "bob", "alice", [], ["SELECT (id)"]),
     ("bob=w*/alice", "bob", "alice", [], ["UPDATE (id)"]),
@@ -379,6 +435,42 @@ parse_col_data = [
     ("bob=C*/alice", "bob", "alice", [], []),
     ("bob=c*/alice", "bob", "alice", [], []),
     ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], []),
+    ("bob=A*/alice", "bob", "alice", [], []),
+]
+
+parse_param_data = [
+    ("alice=sA/alice", "alice", "alice", ["ALL"], []),
+    ("alice=s*A*/alice", "alice", "alice", [], ["ALL"]),
+    ("bob=U/alice", "bob", "alice", [], []),
+    ("bob=a/alice", "bob", "alice", [], []),
+    ("bob=r/alice", "bob", "alice", [], []),
+    ("bob=w/alice", "bob", "alice", [], []),
+    ("bob=d/alice", "bob", "alice", [], []),
+    ("bob=D/alice", "bob", "alice", [], []),
+    ("bob=x/alice", "bob", "alice", [], []),
+    ("bob=t/alice", "bob", "alice", [], []),
+    ("bob=X/alice", "bob", "alice", [], []),
+    ("bob=U/alice", "bob", "alice", [], []),
+    ("bob=C/alice", "bob", "alice", [], []),
+    ("bob=c/alice", "bob", "alice", [], []),
+    ("bob=T/alice", "bob", "alice", [], []),
+    ("bob=s/alice", "bob", "alice", ["SET"], []),
+    ("bob=A/alice", "bob", "alice", ["ALTER SYSTEM"], []),
+    ("bob=a*/alice", "bob", "alice", [], []),
+    ("bob=r*/alice", "bob", "alice", [], []),
+    ("bob=w*/alice", "bob", "alice", [], []),
+    ("bob=d*/alice", "bob", "alice", [], []),
+    ("bob=D*/alice", "bob", "alice", [], []),
+    ("bob=x*/alice", "bob", "alice", [], []),
+    ("bob=t*/alice", "bob", "alice", [], []),
+    ("bob=X*/alice", "bob", "alice", [], []),
+    ("bob=U*/alice", "bob", "alice", [], []),
+    ("bob=C*/alice", "bob", "alice", [], []),
+    ("bob=c*/alice", "bob", "alice", [], []),
+    ("bob=T*/alice", "bob", "alice", [], []),
+    ("bob=s*/alice", "bob", "alice", [], ["SET"]),
+    ("bob=A*/alice", "bob", "alice", [], ["ALTER SYSTEM"]),
 ]
 
 
@@ -475,6 +567,12 @@ def test_parse_lob_data(acl, grantee, grantor, privs, privswgo):
 @pytest.mark.parametrize("acl, grantee, grantor, privs, privswgo", parse_col_data)
 def test_parse_col_data(acl, grantee, grantor, privs, privswgo):
     parsed = parse_acl_item(acl, PgObjectType.TABLE, "id")
+    assert parsed == Privileges(grantee, grantor, privs, privswgo)
+
+
+@pytest.mark.parametrize("acl, grantee, grantor, privs, privswgo", parse_param_data)
+def test_parse_param(acl, grantee, grantor, privs, privswgo):
+    parsed = parse_acl_item(acl, PgObjectType.PARAMETER)
     assert parsed == Privileges(grantee, grantor, privs, privswgo)
 
 

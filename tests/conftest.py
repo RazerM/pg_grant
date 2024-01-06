@@ -10,6 +10,7 @@ from sqlalchemy.engine.url import make_url
 
 tests_dir = Path(__file__).parents[0].resolve()
 test_schema_file = Path(tests_dir, "data", "test-schema.sql")
+test_schema_15_file = Path(tests_dir, "data", "test-schema-15+.sql")
 
 # This matches docker-compose.yml for easy local development
 DEFAULT_DATABASE_URL = "postgresql://postgres@127.0.0.1:5440/postgres"
@@ -67,9 +68,13 @@ def engine(postgres_url):
 
 @pytest.fixture(scope="session")
 def pg_schema(engine):
-    with test_schema_file.open() as fp:
-        with engine.begin() as conn:
+    with engine.begin() as conn:
+        with test_schema_file.open() as fp:
             conn.execute(text(fp.read()))
+        server_version = conn.connection.dbapi_connection.info.server_version
+        if server_version >= 150000:
+            with test_schema_15_file.open() as fp:
+                conn.execute(text(fp.read()))
 
 
 @pytest.fixture
