@@ -1,12 +1,10 @@
 import os
-from contextlib import closing
 from itertools import chain
 from pathlib import Path
 
-import psycopg2
+import psycopg
 import pytest
-from psycopg2 import sql
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg import sql
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
 
@@ -33,9 +31,9 @@ def postgres_url():
     assert superuser_url.username not in {*superusers, *users}
     assert superuser_url.database != dbname
 
-    conn = psycopg2.connect(superuser_url.render_as_string(hide_password=False))
-    with closing(conn), conn.cursor() as cur:
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    superuser_url_str = superuser_url.render_as_string(hide_password=False)
+    with psycopg.connect(superuser_url_str) as conn, conn.cursor() as cur:
+        conn.autocommit = True
         for user in superusers:
             stmt = sql.SQL("CREATE USER {} WITH SUPERUSER PASSWORD {}")
             cur.execute(stmt.format(sql.Identifier(user), sql.Literal(password)))
@@ -50,9 +48,8 @@ def postgres_url():
 
     yield test_url.render_as_string(hide_password=False)
 
-    conn = psycopg2.connect(superuser_url.render_as_string(hide_password=False))
-    with closing(conn), conn.cursor() as cur:
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    with psycopg.connect(superuser_url_str) as conn, conn.cursor() as cur:
+        conn.autocommit = True
         cur.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(dbname)))
         for user in chain(superusers, users):
             user_ident = sql.Identifier(user)
@@ -62,7 +59,8 @@ def postgres_url():
 
 @pytest.fixture(scope="session")
 def engine(postgres_url):
-    engine = create_engine(postgres_url)
+    url = make_url(postgres_url).set(drivername="postgresql+psycopg")
+    engine = create_engine(url)
     yield engine
     engine.dispose()
 

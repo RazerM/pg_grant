@@ -7,7 +7,7 @@ expected_acls = {
     # pg_default has default privileges, so None is returned.
     "pg_default": None,
     # postgres is owner, alice was granted CONNECT
-    "pg_global": ["postgres=C/postgres", "alice=C/postgres"],
+    "pg_global": ("postgres=C/postgres", "alice=C/postgres"),
 }
 
 

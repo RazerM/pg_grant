@@ -18,11 +18,14 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
 ]
-dependencies = ["attrs"]
+dependencies = [
+    "attrs>=21.3",
+    "typing_extensions; python_version<'3.9'"
+]
 
 [project.optional-dependencies]
-sqlalchemy = ["sqlalchemy[postgresql]>=1.4"]
-test = ["plumbum", "pytest"]
+sqlalchemy = ["sqlalchemy>=2"]
+test = ["plumbum", "pytest", "sqlalchemy[postgresql_psycopg]>=2"]
 docs = ["pg_grant[sqlalchemy]", "sphinx>=6", "furo"]
 docstest = ["pg_grant[docs]", "doc8"]
 pep8test = ["flake8", "pep8-naming"]
@@ -40,3 +43,17 @@ ignore-path = "docs/_build/"
 [tool.isort]
 profile = "black"
 known_first_party = ["pg_grant"]
+
+[tool.mypy]
+warn_unused_configs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_reexport = true
+strict_equality = true

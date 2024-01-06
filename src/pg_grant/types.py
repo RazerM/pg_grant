@@ -1,6 +1,26 @@
+import sys
 from enum import Enum
+from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Tuple, overload
 
-import attr
+from attrs import Factory, converters, define, field
+
+try:
+    from ._typing_sqlalchemy import (
+        AnyTarget,
+        ArgTypesInput,
+        ExecutableType,
+        SequenceType,
+        TableTarget,
+    )
+except ImportError:
+    HAVE_SQLALCHEMY = False
+else:
+    HAVE_SQLALCHEMY = True
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 
 class PgObjectType(Enum):
@@ -20,128 +40,320 @@ class PgObjectType(Enum):
     LARGE_OBJECT = "LARGE OBJECT"
 
 
-@attr.s(slots=True)
+@define
 class Privileges:
     """Stores information from a parsed privilege string.
 
     .. seealso:: :func:`~.parse.parse_acl_item`
     """
 
-    grantee = attr.ib()
-    grantor = attr.ib()
-    privs = attr.ib(factory=list)
-    privswgo = attr.ib(factory=list)
+    grantee: str
+    grantor: str
+    privs: List[str] = Factory(list)
+    privswgo: List[str] = Factory(list)
 
-    def as_grant_statements(self, type_: PgObjectType, target, **kwargs):
-        """Return array of :func:`~.sql.grant` statements that can be executed
-        to grant these privileges. Refer to the function documentation for the
-        meaning of `target` and additional keyword arguments.
+    if TYPE_CHECKING or HAVE_SQLALCHEMY:
 
-        .. note:: This requires installing with the ``sqlalchemy`` extra.
-        """
-        from .sql import grant
+        @overload
+        def as_grant_statements(
+            self,
+            type: Literal[
+                PgObjectType.TABLE,
+                PgObjectType.SEQUENCE,
+                PgObjectType.LANGUAGE,
+                PgObjectType.SCHEMA,
+                PgObjectType.DATABASE,
+                PgObjectType.TABLESPACE,
+                PgObjectType.TYPE,
+                PgObjectType.FOREIGN_DATA_WRAPPER,
+                PgObjectType.FOREIGN_SERVER,
+                PgObjectType.FOREIGN_TABLE,
+                PgObjectType.LARGE_OBJECT,
+            ],
+            target: str,
+            *,
+            schema: Optional[str] = ...,
+            arg_types: Optional[ArgTypesInput] = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        statements = []
+        @overload
+        def as_grant_statements(
+            self,
+            type: Literal[PgObjectType.TABLE],
+            target: TableTarget,
+            *,
+            schema: None = ...,
+            arg_types: None = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        if self.privs:
-            statements.append(grant(self.privs, type_, target, self.grantee, **kwargs))
+        @overload
+        def as_grant_statements(
+            self,
+            type: Literal[PgObjectType.SEQUENCE],
+            target: SequenceType,
+            *,
+            schema: None = ...,
+            arg_types: None = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        if self.privswgo:
-            statements.append(
-                grant(
-                    self.privswgo,
-                    type_,
-                    target,
-                    self.grantee,
-                    grant_option=True,
-                    **kwargs,
+        @overload
+        def as_grant_statements(
+            self,
+            type: Literal[PgObjectType.FUNCTION],
+            target: str,
+            *,
+            schema: Optional[str] = ...,
+            arg_types: ArgTypesInput,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
+
+        def as_grant_statements(
+            self,
+            type: PgObjectType,
+            target: AnyTarget,
+            *,
+            schema: Optional[str] = None,
+            arg_types: Optional[ArgTypesInput] = None,
+            quote_subname: bool = True,
+        ) -> List[ExecutableType]:
+            """Return array of :func:`~.sql.grant` statements that can be executed
+            to grant these privileges. Refer to the function documentation for the
+            meaning of `target` and additional keyword arguments.
+
+            .. note:: This requires installing with the ``sqlalchemy`` extra.
+            """
+            from .sql import _Grant as grant
+
+            statements: List[ExecutableType] = []
+
+            if self.privs:
+                statements.append(
+                    grant(
+                        self.privs,
+                        type,
+                        target,
+                        self.grantee,
+                        schema=schema,
+                        arg_types=arg_types,
+                        quote_subname=quote_subname,
+                    )
                 )
-            )
 
-        return statements
+            if self.privswgo:
+                statements.append(
+                    grant(
+                        self.privswgo,
+                        type,
+                        target,
+                        self.grantee,
+                        grant_option=True,
+                        schema=schema,
+                        arg_types=arg_types,
+                        quote_subname=quote_subname,
+                    )
+                )
 
-    def as_revoke_statements(self, type_: PgObjectType, target, **kwargs):
-        """Return array of :func:`~.sql.revoke` statements that can be executed
-        to revoke these privileges. Refer to the function documentation for the
-        meaning of `target` and additional keyword arguments.
+            return statements
 
-        .. note::
+        @overload
+        def as_revoke_statements(
+            self,
+            type: Literal[
+                PgObjectType.TABLE,
+                PgObjectType.SEQUENCE,
+                PgObjectType.LANGUAGE,
+                PgObjectType.SCHEMA,
+                PgObjectType.DATABASE,
+                PgObjectType.TABLESPACE,
+                PgObjectType.TYPE,
+                PgObjectType.FOREIGN_DATA_WRAPPER,
+                PgObjectType.FOREIGN_SERVER,
+                PgObjectType.FOREIGN_TABLE,
+                PgObjectType.LARGE_OBJECT,
+            ],
+            target: str,
+            *,
+            schema: Optional[str] = ...,
+            arg_types: Optional[ArgTypesInput] = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-            The statement for the `privswgo` privileges will revoke them
-            fully, not only their grant options.
+        @overload
+        def as_revoke_statements(
+            self,
+            type: Literal[PgObjectType.TABLE],
+            target: TableTarget,
+            *,
+            schema: None = ...,
+            arg_types: None = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        .. note:: This requires installing with the ``sqlalchemy`` extra.
-        """
-        from .sql import revoke
+        @overload
+        def as_revoke_statements(
+            self,
+            type: Literal[PgObjectType.SEQUENCE],
+            target: SequenceType,
+            *,
+            schema: None = ...,
+            arg_types: None = ...,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        statements = []
+        @overload
+        def as_revoke_statements(
+            self,
+            type: Literal[PgObjectType.FUNCTION],
+            target: str,
+            *,
+            schema: Optional[str] = ...,
+            arg_types: ArgTypesInput,
+            quote_subname: bool = ...,
+        ) -> List[ExecutableType]:
+            ...
 
-        if self.privs:
-            statements.append(revoke(self.privs, type_, target, self.grantee, **kwargs))
+        def as_revoke_statements(
+            self,
+            type: PgObjectType,
+            target: AnyTarget,
+            *,
+            schema: Optional[str] = None,
+            arg_types: Optional[ArgTypesInput] = None,
+            quote_subname: bool = True,
+        ) -> List[ExecutableType]:
+            """Return array of :func:`~.sql.revoke` statements that can be executed
+            to revoke these privileges. Refer to the function documentation for the
+            meaning of `target` and additional keyword arguments.
 
-        if self.privswgo:
-            statements.append(
-                revoke(self.privswgo, type_, target, self.grantee, **kwargs)
-            )
+            .. note::
 
-        return statements
+                The statement for the `privswgo` privileges will revoke them
+                fully, not only their grant options.
+
+            .. note:: This requires installing with the ``sqlalchemy`` extra.
+            """
+            from .sql import _Revoke as revoke
+
+            statements: List[ExecutableType] = []
+
+            if self.privs:
+                statements.append(
+                    revoke(
+                        self.privs,
+                        type,
+                        target,
+                        self.grantee,
+                        schema=schema,
+                        arg_types=arg_types,
+                        quote_subname=quote_subname,
+                    )
+                )
+
+            if self.privswgo:
+                statements.append(
+                    revoke(
+                        self.privswgo,
+                        type,
+                        target,
+                        self.grantee,
+                        schema=schema,
+                        arg_types=arg_types,
+                        quote_subname=quote_subname,
+                    )
+                )
+
+            return statements
+
+    else:
+
+        def as_grant_statements(
+            self,
+            type: Any,
+            target: Any,
+            *,
+            schema: Optional[str] = None,
+            arg_types: Optional[Any] = None,
+            quote_subname: bool = True,
+        ) -> NoReturn:
+            raise RuntimeError("Missing sqlalchemy extra")
+
+        def as_revoke_statements(
+            self,
+            type: Any,
+            target: Any,
+            *,
+            schema: Optional[str] = None,
+            arg_types: Optional[Any] = None,
+            quote_subname: bool = True,
+        ) -> NoReturn:
+            raise RuntimeError("Missing sqlalchemy extra")
 
 
-@attr.s(slots=True)
+@define
 class RelationInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
 
     #: Row identifier.
-    oid = attr.ib()
+    oid: int
 
     #: Name of the table, sequence, etc.
-    name = attr.ib()
+    name: str
 
     #: Owner of the relation.
-    owner = attr.ib()
+    owner: str
 
     #: Access control list.
-    acl = attr.ib()
+    acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
 
 
-@attr.s(slots=True)
+@define
 class SchemaRelationInfo(RelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
 
     #: The name of the schema that contains this relation.
-    schema = attr.ib()
+    schema: str
 
 
-@attr.s(slots=True)
+@define
 class FunctionInfo(SchemaRelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
 
     #: Data types of the function arguments.
-    arg_types = attr.ib()
+    arg_types: Tuple[str, ...] = field(converter=tuple)
 
 
-@attr.s(slots=True)
+@define
 class ColumnInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
 
     #: Table identifier.
-    table_oid = attr.ib()
+    table_oid: int
 
     #: The name of the schema that contains the table.
-    schema = attr.ib()
+    schema: str
 
     #: Name of the table.
-    table = attr.ib()
+    table: str
 
     #: Name of the column.
-    column = attr.ib()
+    column: str
 
     #: Owner of the table.
-    owner = attr.ib()
+    owner: str
 
     #: Column access control list.
-    acl = attr.ib()
+    acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))

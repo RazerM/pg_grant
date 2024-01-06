@@ -43,7 +43,7 @@ html_static_path = []
 # intersphinx
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "psycopg2": ("https://www.psycopg.org/docs/", None),
+    "psycopg": ("https://www.psycopg.org/psycopg3/docs", None),
 }
 
 autodoc_member_order = "bysource"

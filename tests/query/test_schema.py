@@ -13,14 +13,15 @@ def test_get_schema_acl(connection, expected_acls):
 
 @pytest.fixture
 def expected_acls(connection, request):
-    if connection.connection.server_version >= 150000:
+    server_version = connection.connection.dbapi_connection.info.server_version
+    if server_version >= 150000:
         return {
             # pg_database_owner is owner, public get usage on the public schema
             # by default
-            "public": [
+            "public": (
                 "pg_database_owner=UC/pg_database_owner",
                 "=U/pg_database_owner",
-            ],
+            ),
             # schema1 has default privileges, so None is returned.
             "schema1": None,
         }
@@ -28,7 +29,7 @@ def expected_acls(connection, request):
         return {
             # postgres is owner, public get access to the public schema by
             # default
-            "public": ["postgres=UC/postgres", "=UC/postgres"],
+            "public": ("postgres=UC/postgres", "=UC/postgres"),
             # schema1 has default privileges, so None is returned.
             "schema1": None,
         }

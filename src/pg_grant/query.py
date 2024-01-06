@@ -1,10 +1,30 @@
+import sys
+import typing as t
 from enum import Enum
-from typing import Sequence
+from typing import Any, List, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
-from sqlalchemy import ARRAY, Text, cast, column, func, select, table, text
+from sqlalchemy import (
+    ARRAY,
+    Connection,
+    Select,
+    Text,
+    cast,
+    column,
+    func,
+    select,
+    table,
+    text,
+)
+from sqlalchemy.orm import Session
 
+from ._typing_sqlalchemy import ArgTypesInput
 from .exc import NoSuchObjectError
 from .types import ColumnInfo, FunctionInfo, RelationInfo, SchemaRelationInfo
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 __all__ = (
     "get_all_table_acls",
@@ -34,6 +54,9 @@ array_agg = func.array_agg
 unnest = func.unnest
 coalesce = func.coalesce
 canonical_type = func.pg_temp.pg_grant_canonical_type
+
+TP = TypeVar("TP", bound=Tuple[Any, ...])
+Connectable: TypeAlias = Union[Connection, Session]
 
 
 class PgRelKind(Enum):
@@ -152,7 +175,8 @@ _pg_attribute_stmt = (
     .where(pg_attribute.c.attnum > 0)
     .where(~pg_attribute.c.attisdropped)
     .where(
-        pg_class.c.relkind.in_(
+        # need to cast for PostgreSQL < 13 on psycopg3
+        cast(pg_class.c.relkind, Text).in_(
             [
                 PgRelKind.TABLE.value,
                 PgRelKind.VIEW.value,
@@ -244,7 +268,9 @@ _pg_type_stmt = (
 )
 
 
-def _filter_pg_class_stmt(stmt, schema=None, rel_name=None):
+def _filter_pg_class_stmt(
+    stmt: Select[TP], schema: Optional[str] = None, rel_name: Optional[str] = None
+) -> Select[TP]:
     if schema is not None:
         stmt = stmt.where(pg_namespace.c.nspname == schema)
 
@@ -259,7 +285,11 @@ def _filter_pg_class_stmt(stmt, schema=None, rel_name=None):
     return stmt
 
 
-def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
+def _filter_pg_proc_stmt(
+    schema: Optional[str] = None,
+    function_name: Optional[str] = None,
+    arg_types: Optional[ArgTypesInput] = None,
+) -> Select[Any]:
     stmt = _pg_proc_stmt
 
     if (function_name is None) != (arg_types is None):
@@ -271,12 +301,15 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
         stmt = stmt.where(pg_namespace.c.nspname == schema)
 
     if function_name is not None:
+        assert arg_types is not None
         arg_types = list(arg_types)
 
+        arg_types_sub: Any
         if arg_types:
+            typs = func.unnest(cast(arg_types, ARRAY(Text))).alias("typs")
             arg_types_sub = (
-                select(array_agg(canonical_type(column("typs"))))
-                .select_from(func.unnest(arg_types).alias("typs"))
+                select(array_agg(canonical_type(typs.column)))
+                .select_from(typs)
                 .scalar_subquery()
             )
         else:
@@ -290,7 +323,9 @@ def _filter_pg_proc_stmt(schema=None, function_name=None, arg_types=None):
     return stmt
 
 
-def _filter_pg_type_stmt(schema=None, type_name=None):
+def _filter_pg_type_stmt(
+    schema: Optional[str] = None, type_name: Optional[str] = None
+) -> Select[Any]:
     stmt = _pg_type_stmt
 
     if schema is not None:
@@ -304,10 +339,13 @@ def _filter_pg_type_stmt(schema=None, type_name=None):
     return stmt
 
 
-def _table_stmt(schema=None, table_name=None):
+def _table_stmt(
+    schema: Optional[str] = None, table_name: Optional[str] = None
+) -> Select[Any]:
     stmt = _filter_pg_class_stmt(_pg_class_stmt, schema=schema, rel_name=table_name)
     return stmt.where(
-        pg_class.c.relkind.in_(
+        # need to cast for PostgreSQL < 13 on psycopg3
+        cast(pg_class.c.relkind, Text).in_(
             [
                 PgRelKind.TABLE.value,
                 PgRelKind.VIEW.value,
@@ -319,12 +357,16 @@ def _table_stmt(schema=None, table_name=None):
     )
 
 
-def _sequence_stmt(schema=None, sequence_name=None):
+def _sequence_stmt(
+    schema: Optional[str] = None, sequence_name: Optional[str] = None
+) -> Select[Any]:
     stmt = _filter_pg_class_stmt(_pg_class_stmt, schema=schema, rel_name=sequence_name)
     return stmt.where(pg_class.c.relkind == PgRelKind.SEQUENCE.value)
 
 
-def get_all_table_acls(conn, schema=None):
+def get_all_table_acls(
+    conn: Connectable, schema: Optional[str] = None
+) -> List[SchemaRelationInfo]:
     """Get privileges for all tables, views, materialized views, and foreign
     tables.
 
@@ -334,10 +376,15 @@ def get_all_table_acls(conn, schema=None):
         List of :class:`~.types.SchemaRelationInfo` objects.
     """
     stmt = _table_stmt(schema=schema)
-    return [SchemaRelationInfo(**row) for row in conn.execute(stmt).mappings()]
+    return [
+        SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(stmt).mappings()
+    ]
 
 
-def get_table_acl(conn, name, schema=None):
+def get_table_acl(
+    conn: Connectable, name: str, schema: Optional[str] = None
+) -> SchemaRelationInfo:
     """Get privileges for the table, view, materialized view, or foreign table
     specified by `name`.
 
@@ -351,10 +398,12 @@ def get_table_acl(conn, name, schema=None):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(name)
-    return SchemaRelationInfo(**row)
+    return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_column_acls(conn, schema=None):
+def get_all_column_acls(
+    conn: Connectable, schema: Optional[str] = None
+) -> List[ColumnInfo]:
     """Get privileges for all table, view, materialized view, and foreign
     table columns.
 
@@ -364,10 +413,15 @@ def get_all_column_acls(conn, schema=None):
         List of :class:`~.types.ColumnInfo` objects.
     """
     stmt = _filter_pg_class_stmt(_pg_attribute_stmt, schema=schema)
-    return [ColumnInfo(**row) for row in conn.execute(stmt).mappings()]
+    return [
+        ColumnInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(stmt).mappings()
+    ]
 
 
-def get_column_acls(conn, table_name, schema=None):
+def get_column_acls(
+    conn: Connectable, table_name: str, schema: Optional[str] = None
+) -> List[ColumnInfo]:
     """Get column privileges for the table, view, materialized view, or foreign
     table specified by `name`.
 
@@ -381,20 +435,27 @@ def get_column_acls(conn, table_name, schema=None):
     rows = conn.execute(stmt).mappings().all()
     if not rows:
         raise NoSuchObjectError(table_name)
-    return [ColumnInfo(**row) for row in rows]
+    return [ColumnInfo(**t.cast("Mapping[str, Any]", row)) for row in rows]
 
 
-def get_all_sequence_acls(conn, schema=None):
+def get_all_sequence_acls(
+    conn: Connectable, schema: Optional[str] = None
+) -> List[SchemaRelationInfo]:
     """Unless `schema` is given, returns all sequences from all schemas.
 
     Returns:
         List of :class:`~.types.SchemaRelationInfo` objects.
     """
     stmt = _sequence_stmt(schema=schema)
-    return [SchemaRelationInfo(**row) for row in conn.execute(stmt).mappings()]
+    return [
+        SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(stmt).mappings()
+    ]
 
 
-def get_sequence_acl(conn, sequence, schema=None):
+def get_sequence_acl(
+    conn: Connectable, sequence: str, schema: Optional[str] = None
+) -> SchemaRelationInfo:
     """If `schema` is not given, the sequence must be visible in the search
     path.
 
@@ -405,10 +466,10 @@ def get_sequence_acl(conn, sequence, schema=None):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(sequence)
-    return SchemaRelationInfo(**row)
+    return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def _make_canonical_type_function(conn):
+def _make_canonical_type_function(conn: Connectable) -> None:
     """Create function which canonicalizes a type name, returning the input
     when casting to REGTYPE fails.
 
@@ -435,7 +496,9 @@ def _make_canonical_type_function(conn):
     conn.execute(stmt)
 
 
-def get_all_function_acls(conn, schema=None):
+def get_all_function_acls(
+    conn: Connectable, schema: Optional[str] = None
+) -> List[FunctionInfo]:
     """Unless `schema` is given, returns all functions from all schemas.
 
     Returns:
@@ -443,10 +506,18 @@ def get_all_function_acls(conn, schema=None):
     """
     _make_canonical_type_function(conn)
     stmt = _filter_pg_proc_stmt(schema=schema)
-    return [FunctionInfo(**row) for row in conn.execute(stmt).mappings()]
+    return [
+        FunctionInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(stmt).mappings()
+    ]
 
 
-def get_function_acl(conn, function_name, arg_types: Sequence[str], schema=None):
+def get_function_acl(
+    conn: Connectable,
+    function_name: str,
+    arg_types: ArgTypesInput,
+    schema: Optional[str] = None,
+) -> FunctionInfo:
     """If `schema` is not given, the function must be visible in the search path.
 
     Returns:
@@ -467,18 +538,21 @@ def get_function_acl(conn, function_name, arg_types: Sequence[str], schema=None)
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(function_name)
-    return FunctionInfo(**row)
+    return FunctionInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_language_acls(conn):
+def get_all_language_acls(conn: Connectable) -> List[RelationInfo]:
     """
     Returns:
         List of :class:`~.types.RelationInfo` objects.
     """
-    return [RelationInfo(**row) for row in conn.execute(_pg_lang_stmt).mappings()]
+    return [
+        RelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(_pg_lang_stmt).mappings()
+    ]
 
 
-def get_language_acl(conn, language):
+def get_language_acl(conn: Connectable, language: str) -> RelationInfo:
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -487,18 +561,21 @@ def get_language_acl(conn, language):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(language)
-    return RelationInfo(**row)
+    return RelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_schema_acls(conn):
+def get_all_schema_acls(conn: Connectable) -> List[RelationInfo]:
     """
     Returns:
         List of :class:`~.types.RelationInfo` objects.
     """
-    return [RelationInfo(**row) for row in conn.execute(_pg_schema_stmt).mappings()]
+    return [
+        RelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(_pg_schema_stmt).mappings()
+    ]
 
 
-def get_schema_acl(conn, schema):
+def get_schema_acl(conn: Connectable, schema: str) -> RelationInfo:
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -507,18 +584,21 @@ def get_schema_acl(conn, schema):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(schema)
-    return RelationInfo(**row)
+    return RelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_database_acls(conn):
+def get_all_database_acls(conn: Connectable) -> List[RelationInfo]:
     """
     Returns:
         List of :class:`~.types.RelationInfo` objects.
     """
-    return [RelationInfo(**row) for row in conn.execute(_pg_db_stmt).mappings()]
+    return [
+        RelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(_pg_db_stmt).mappings()
+    ]
 
 
-def get_database_acl(conn, database):
+def get_database_acl(conn: Connectable, database: str) -> RelationInfo:
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -527,18 +607,21 @@ def get_database_acl(conn, database):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(database)
-    return RelationInfo(**row)
+    return RelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_tablespace_acls(conn):
+def get_all_tablespace_acls(conn: Connectable) -> List[RelationInfo]:
     """
     Returns:
         List of :class:`~.types.RelationInfo` objects.
     """
-    return [RelationInfo(**row) for row in conn.execute(_pg_tablespace_stmt).mappings()]
+    return [
+        RelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(_pg_tablespace_stmt).mappings()
+    ]
 
 
-def get_tablespace_acl(conn, tablespace):
+def get_tablespace_acl(conn: Connectable, tablespace: str) -> RelationInfo:
     """
     Returns:
          :class:`~.types.RelationInfo`
@@ -547,20 +630,27 @@ def get_tablespace_acl(conn, tablespace):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(tablespace)
-    return RelationInfo(**row)
+    return RelationInfo(**t.cast("Mapping[str, Any]", row))
 
 
-def get_all_type_acls(conn, schema=None):
+def get_all_type_acls(
+    conn: Connectable, schema: Optional[str] = None
+) -> List[SchemaRelationInfo]:
     """Unless `schema` is given, returns all types from all schemas.
 
     Returns:
         List of :class:`~.types.SchemaRelationInfo` objects.
     """
     stmt = _filter_pg_type_stmt(schema=schema)
-    return [SchemaRelationInfo(**row) for row in conn.execute(stmt).mappings()]
+    return [
+        SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))
+        for row in conn.execute(stmt).mappings()
+    ]
 
 
-def get_type_acl(conn, type_name, schema=None):
+def get_type_acl(
+    conn: Connectable, type_name: str, schema: Optional[str] = None
+) -> SchemaRelationInfo:
     """If `schema` is not given, the type must be visible in the search path.
 
     Returns:
@@ -570,4 +660,4 @@ def get_type_acl(conn, type_name, schema=None):
     row = conn.execute(stmt).mappings().first()
     if row is None:
         raise NoSuchObjectError(type_name)
-    return SchemaRelationInfo(**row)
+    return SchemaRelationInfo(**t.cast("Mapping[str, Any]", row))

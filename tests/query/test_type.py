@@ -9,7 +9,7 @@ expected_acls = {
         "bug_status": None,
         # alice is owner, bob was granted usage, public must get usage by default
         # https://stackoverflow.com/questions/46656644
-        "thing": ["=U/alice", "alice=U/alice", "bob=U/alice"],
+        "thing": ("=U/alice", "alice=U/alice", "bob=U/alice"),
     },
 }
 
