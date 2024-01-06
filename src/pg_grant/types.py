@@ -299,7 +299,7 @@ class Privileges:
             raise RuntimeError("Missing sqlalchemy extra")
 
 
-@define
+@define(kw_only=True)
 class RelationInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -317,7 +317,7 @@ class RelationInfo:
     acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
 
 
-@define
+@define(kw_only=True)
 class SchemaRelationInfo(RelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -326,7 +326,7 @@ class SchemaRelationInfo(RelationInfo):
     schema: str
 
 
-@define
+@define(kw_only=True)
 class FunctionInfo(SchemaRelationInfo):
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
@@ -335,7 +335,7 @@ class FunctionInfo(SchemaRelationInfo):
     arg_types: Tuple[str, ...] = field(converter=tuple)
 
 
-@define
+@define(kw_only=True)
 class ColumnInfo:
     """Holds object information and privileges as queried using the
     :mod:`.query` submodule."""
