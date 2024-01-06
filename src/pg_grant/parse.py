@@ -70,6 +70,8 @@ def get_default_privileges(type: PgObjectType, owner: str) -> List[Privileges]:
         # default.
         # https://stackoverflow.com/questions/46656644
         public_privs = ["USAGE"]
+    elif type is PgObjectType.DOMAIN:
+        public_privs = ["USAGE"]
 
     if public_privs:
         priv_list.append(
@@ -203,6 +205,8 @@ def parse_acl_item(
         convert_priv("C", "CREATE")
         convert_priv("c", "CONNECT")
         convert_priv("T", "TEMPORARY")
+        convert_priv("s", "SET")
+        convert_priv("A", "ALTER SYSTEM")
 
         # Don't think anything can have all of them, but set all to False
         # since we don't know type.
@@ -237,6 +241,8 @@ def parse_acl_item(
         convert_priv("C", "CREATE")
     elif type is PgObjectType.TYPE:
         convert_priv("U", "USAGE")
+    elif type is PgObjectType.DOMAIN:
+        convert_priv("U", "USAGE")
     elif type is PgObjectType.FOREIGN_DATA_WRAPPER:
         convert_priv("U", "USAGE")
     elif type is PgObjectType.FOREIGN_SERVER:
@@ -246,6 +252,9 @@ def parse_acl_item(
     elif type is PgObjectType.LARGE_OBJECT:
         convert_priv("r", "SELECT")
         convert_priv("w", "UPDATE")
+    elif type is PgObjectType.PARAMETER:
+        convert_priv("s", "SET")
+        convert_priv("A", "ALTER SYSTEM")
     else:
         raise ValueError(f"Unknown type: {type}")
 

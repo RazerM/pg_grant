@@ -27,7 +27,7 @@ __all__ = (
 
 _re_valid_priv = re.compile(
     r"(SELECT|UPDATE|INSERT|DELETE|TRUNCATE|REFERENCES|TRIGGER|EXECUTE|USAGE"
-    r"|CREATE|CONNECT|TEMPORARY|ALL)(?:\s+\((.*)\))?"
+    r"|CREATE|CONNECT|TEMPORARY|SET|ALTER SYSTEM|ALL)(?:\s+\((.*)\))?"
 )
 
 
@@ -202,10 +202,12 @@ def grant(
         PgObjectType.DATABASE,
         PgObjectType.TABLESPACE,
         PgObjectType.TYPE,
+        PgObjectType.DOMAIN,
         PgObjectType.FOREIGN_DATA_WRAPPER,
         PgObjectType.FOREIGN_SERVER,
         PgObjectType.FOREIGN_TABLE,
         PgObjectType.LARGE_OBJECT,
+        PgObjectType.PARAMETER,
     ],
     target: str,
     grantee: str,
@@ -319,10 +321,12 @@ def revoke(
         PgObjectType.DATABASE,
         PgObjectType.TABLESPACE,
         PgObjectType.TYPE,
+        PgObjectType.DOMAIN,
         PgObjectType.FOREIGN_DATA_WRAPPER,
         PgObjectType.FOREIGN_SERVER,
         PgObjectType.FOREIGN_TABLE,
         PgObjectType.LARGE_OBJECT,
+        PgObjectType.PARAMETER,
     ],
     target: str,
     grantee: str,

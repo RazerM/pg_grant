@@ -34,10 +34,12 @@ class PgObjectType(Enum):
     DATABASE = "DATABASE"
     TABLESPACE = "TABLESPACE"
     TYPE = "TYPE"
+    DOMAIN = "DOMAIN"
     FOREIGN_DATA_WRAPPER = "FOREIGN DATA WRAPPER"
     FOREIGN_SERVER = "FOREIGN SERVER"
     FOREIGN_TABLE = "FOREIGN TABLE"
     LARGE_OBJECT = "LARGE OBJECT"
+    PARAMETER = "PARAMETER"
 
 
 @define
@@ -356,4 +358,19 @@ class ColumnInfo:
     owner: str
 
     #: Column access control list.
+    acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
+
+
+@define(kw_only=True)
+class ParameterInfo:
+    """Holds object information and privileges as queried using the
+    :mod:`.query` submodule."""
+
+    #: Row identifier.
+    oid: int
+
+    #: Name of the table, sequence, etc.
+    name: str
+
+    #: Access control list.
     acl: Optional[Tuple[str, ...]] = field(converter=converters.optional(tuple))
