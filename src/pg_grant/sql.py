@@ -1,6 +1,6 @@
 import re
 import sys
-from typing import Any, ClassVar, List, Optional, Tuple, Union, cast, overload
+from typing import Any, ClassVar, List, Literal, Optional, Tuple, Union, cast, overload
 
 from sqlalchemy import FromClause, Sequence, inspect
 from sqlalchemy.ext.compiler import compiles
@@ -9,11 +9,6 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 
 from ._typing_sqlalchemy import AnyTarget, ArgTypesInput, TableTarget
 from .types import PgObjectType
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias

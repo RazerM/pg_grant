@@ -1,4 +1,3 @@
-import sys
 from enum import Enum
 from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Tuple, overload
 
@@ -17,10 +16,7 @@ except ImportError:
 else:
     HAVE_SQLALCHEMY = True
 
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import Literal
 
 
 class PgObjectType(Enum):
