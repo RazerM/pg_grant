@@ -19,6 +19,9 @@
   - `quote_subname`
 - The `type_` parameter for `as_grant_statements` and `as_revoke_statements` was
   renamed to `type`.
+- Installing `pg-grant[sqlalchemy]` no longer installs psycopg2. Make sure you
+  depend on a driver like `sqlalchemy[postgresql]` (psycopg2) or
+  `sqlalchemy[postgresql_psycopg]` (psycopg 3).
 
 ### Removed
 

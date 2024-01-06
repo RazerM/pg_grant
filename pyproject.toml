@@ -24,8 +24,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-sqlalchemy = ["sqlalchemy[postgresql]>=2"]
-test = ["plumbum", "pytest"]
+sqlalchemy = ["sqlalchemy>=2"]
+test = ["plumbum", "pytest", "sqlalchemy[postgresql_psycopg]>=2"]
 docs = ["pg_grant[sqlalchemy]", "sphinx>=6", "furo"]
 docstest = ["pg_grant[docs]", "doc8"]
 pep8test = ["flake8", "pep8-naming"]
