@@ -1,9 +1,9 @@
-from typing import List, Optional, Sequence
+from typing import List, Optional, Tuple, Union
 
 from .types import PgObjectType, Privileges
 
 
-def _get_acl_username(acl):
+def _get_acl_username(acl: str) -> Tuple[int, str]:
     """Port of ``copyAclUserName`` from ``dumputils.c``"""
     i = 0
     output = ""
@@ -80,7 +80,7 @@ def get_default_privileges(type: PgObjectType, owner: str) -> List[Privileges]:
 
 
 def parse_acl(
-    acl: Sequence[str],
+    acl: Union[List[str], Tuple[str, ...]],
     type: Optional[PgObjectType] = None,
     subname: Optional[str] = None,
 ) -> List[Privileges]:
@@ -113,14 +113,15 @@ def parse_acl_item(
         acl_item: ACL item, e.g. ``'alice=arwdDxt/bob'``
         type: Optional. If passed, all privileges may be reduced to ``['ALL']``.
         subname: Optional, e.g. for column privileges. Must be output from
-                 :func:`psycopg2.extensions.quote_ident` or similar.
+                 :meth:`psycopg.sql.Identifier` or similar.
 
     .. warning::
 
         If the ``privs`` or ``privswgo`` attributes of the returned object will
         be used to construct an SQL statement, `subname` **must be a valid
-        identifier** (e.g. by calling :func:`psycopg2.extensions.quote_ident`)
-        in order to prevent SQL injection attacks.
+        identifier** (e.g. by calling :meth:`~psycopg.sql.Composable.as_string`
+        on :class:`psycopg.sql.Identifier`) in order to prevent SQL injection
+        attacks.
 
         :func:`~pg_grant.sql.grant` and :func:`~pg_grant.sql.revoke` are not
         vulnerable, because those functions quote the embedded identifier:
@@ -141,10 +142,10 @@ def parse_acl_item(
 
         .. code-block:: pycon
 
-            >>> import psycopg2
-            >>> from psycopg2.extensions import quote_ident
-            >>> conn = psycopg2.connect(...)
-            >>> parse_acl_item("alice=r/bob", subname=quote_ident("user", conn))
+            >>> import psycopg
+            >>> from psycopg.sql import Identifier
+            >>> conn = psycopg.connect(...)
+            >>> parse_acl_item("alice=r/bob", subname=Identifier("user").as_string(conn))
             >>> privs.privs
             ['SELECT ("user")']
 
@@ -167,7 +168,7 @@ def parse_acl_item(
 
     priv = acl_item[eq_pos + 1 : slash_pos]
 
-    def convert_priv(code, keyword):
+    def convert_priv(code: str, keyword: str) -> None:
         nonlocal all_with_grant_option, all_without_grant_option
 
         pos = priv.find(code)

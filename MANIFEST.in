@@ -7,3 +7,4 @@ recursive-include tests *.sql
 recursive-include docs *
 prune docs/_build
 include *-requirements.txt
+include src/pg_grant/py.typed

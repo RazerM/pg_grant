@@ -7,7 +7,7 @@ expected_acls = {
     # sql has default privileges, so None is returned.
     "sql": None,
     # postgres is owner, alice was granted usage
-    "plpgsql": ["postgres=U/postgres", "alice=U/postgres"],
+    "plpgsql": ("postgres=U/postgres", "alice=U/postgres"),
 }
 
 

@@ -1,10 +1,24 @@
 import re
+import sys
+from typing import Any, ClassVar, List, Optional, Tuple, Union, cast, overload
 
-from sqlalchemy import inspect
+from sqlalchemy import FromClause, Sequence, inspect
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.compiler import SQLCompiler
 from sqlalchemy.sql.expression import ClauseElement, Executable
 
-from pg_grant.types import PgObjectType
+from ._typing_sqlalchemy import AnyTarget, ArgTypesInput, TableTarget
+from .types import PgObjectType
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 __all__ = (
     "grant",
@@ -17,56 +31,56 @@ _re_valid_priv = re.compile(
 )
 
 
-def _as_table(element):
+def _as_table(element: Any) -> FromClause:
     """Allow a Table or ORM model to be used as a table name."""
     insp = inspect(element, raiseerr=False)
 
     try:
-        return insp.selectable
+        return cast(FromClause, insp.selectable)
     except AttributeError:
         raise ValueError("Expected table element.")
 
 
+# This could accept Sequence[str] but I think there's more utility to
+# `privileges="SELECT" being a type error than allowing it.
+PrivilegesInput: TypeAlias = Union[List[str], Tuple[str], Literal["ALL"]]
+
+
 class _GrantRevoke(Executable, ClauseElement):
-    valid_privileges = {
-        "SELECT",
-        "UPDATE",
-        "INSERT",
-        "DELETE",
-        "TRUNCATE",
-        "REFERENCES",
-        "TRIGGER",
-        "EXECUTE",
-        "USAGE",
-        "CREATE",
-        "CONNECT",
-        "TEMPORARY",
-        "ALL",
-    }
-    keyword = None
+    keyword: ClassVar[Optional[str]] = None
+
+    _privileges: Tuple[str, ...]
+    _priv_type: PgObjectType
+    _target: AnyTarget
+    _grantee: str
+    _grant_option: bool
+    _schema: Optional[str]
+    _arg_types: Optional[Tuple[str, ...]]
+    _quote_subname: bool
 
     def __init__(
         self,
-        privileges,
+        privileges: PrivilegesInput,
         type: PgObjectType,
-        target,
-        grantee,
-        grant_option=False,
-        schema=None,
-        arg_types=None,
-        quote_subname=True,
+        target: AnyTarget,
+        grantee: str,
+        *,
+        grant_option: bool = False,
+        schema: Optional[str] = None,
+        arg_types: Optional[ArgTypesInput] = None,
+        quote_subname: bool = True,
     ):
         if privileges == "ALL":
-            privileges = ["ALL"]
+            privileges = ("ALL",)
 
-        self.privileges = privileges
-        self.priv_type = type
-        self.target = target
-        self.grantee = grantee
-        self.grant_option = grant_option
-        self.schema = schema
-        self.arg_types = arg_types
-        self.quote_subname = quote_subname
+        self._privileges = tuple(privileges)
+        self._priv_type = type
+        self._target = target
+        self._grantee = grantee
+        self._grant_option = grant_option
+        self._schema = schema
+        self._arg_types = None if arg_types is None else tuple(arg_types)
+        self._quote_subname = quote_subname
 
 
 class _Grant(_GrantRevoke):
@@ -81,18 +95,18 @@ class _Revoke(_GrantRevoke):
     keyword = "REVOKE"
 
 
-@compiles(_GrantRevoke)
-def _pg_grant(element, compiler, **kw):
-    target = element.target
-    schema = element.schema
-    arg_types = element.arg_types
-    priv_type = element.priv_type
+@compiles(_GrantRevoke)  # type: ignore[no-untyped-call,misc]
+def _pg_grant(element: _Grant, compiler: SQLCompiler, **kw: Any) -> str:
+    target = element._target
+    schema = element._schema
+    arg_types = element._arg_types
+    priv_type = element._priv_type
 
     preparer = compiler.preparer
 
     privs = []
 
-    for priv in element.privileges:
+    for priv in element._privileges:
         match = _re_valid_priv.match(priv)
         if match is None:
             raise ValueError(f"Privilege not valid: {priv}")
@@ -100,7 +114,7 @@ def _pg_grant(element, compiler, **kw):
         subname = match.group(2)
 
         if subname is not None:
-            if element.quote_subname:
+            if element._quote_subname:
                 subname = preparer.quote(subname)
 
             privs.append(f"{match.group(1)} ({subname})")
@@ -132,15 +146,15 @@ def _pg_grant(element, compiler, **kw):
         if str_target is not None:
             target = str_target
         else:
-            target = preparer.format_sequence(target)
+            target = preparer.format_sequence(target)  # type: ignore[no-untyped-call]
     elif priv_type is PgObjectType.TYPE:
         if str_target is None:
-            target = compiler.process(target)
+            target = compiler.process(target)  # type: ignore[arg-type]
         else:
             target = str_target
     elif priv_type is PgObjectType.FUNCTION:
         if str_target is None:
-            target = compiler.process(target)
+            target = compiler.process(target)  # type: ignore[arg-type]
         else:
             if arg_types is None:
                 raise ValueError(
@@ -152,7 +166,7 @@ def _pg_grant(element, compiler, **kw):
             target = f"{str_target}({str_arg_types})"
     elif isinstance(priv_type, PgObjectType):
         if str_target is None:
-            target = compiler.process(target)
+            target = compiler.process(target)  # type: ignore[arg-type]
         else:
             target = str_target
     else:
@@ -160,33 +174,108 @@ def _pg_grant(element, compiler, **kw):
 
     is_grant = element.keyword == "GRANT"
 
-    grantee = element.grantee
+    grantee = element._grantee
 
     if grantee.upper() != "PUBLIC":
-        grantee = compiler.preparer.quote(element.grantee)
+        grantee = compiler.preparer.quote(grantee)
 
     return "{}{} {} ON {} {} {} {}{}".format(
         element.keyword,
-        " GRANT OPTION FOR" if element.grant_option and not is_grant else "",
+        " GRANT OPTION FOR" if element._grant_option and not is_grant else "",
         priv,
         priv_type.value,
         target,
         "TO" if is_grant else "FROM",
         grantee,
-        " WITH GRANT OPTION" if element.grant_option and is_grant else "",
+        " WITH GRANT OPTION" if element._grant_option and is_grant else "",
     )
 
 
+@overload
 def grant(
-    privileges,
+    privileges: PrivilegesInput,
+    type: Literal[
+        PgObjectType.TABLE,
+        PgObjectType.SEQUENCE,
+        PgObjectType.LANGUAGE,
+        PgObjectType.SCHEMA,
+        PgObjectType.DATABASE,
+        PgObjectType.TABLESPACE,
+        PgObjectType.TYPE,
+        PgObjectType.FOREIGN_DATA_WRAPPER,
+        PgObjectType.FOREIGN_SERVER,
+        PgObjectType.FOREIGN_TABLE,
+        PgObjectType.LARGE_OBJECT,
+    ],
+    target: str,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: Optional[str] = ...,
+    arg_types: Optional[ArgTypesInput] = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    """This overload handles all cases where target and schema are strings
+    except functions (see arg_types).
+    """
+
+
+@overload
+def grant(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.TABLE],
+    target: TableTarget,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: None = ...,
+    arg_types: None = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+@overload
+def grant(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.SEQUENCE],
+    target: Sequence,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: None = ...,
+    arg_types: None = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+@overload
+def grant(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.FUNCTION],
+    target: str,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: Optional[str] = ...,
+    arg_types: ArgTypesInput,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+def grant(
+    privileges: PrivilegesInput,
     type: PgObjectType,
-    target,
-    grantee,
-    grant_option=False,
-    schema=None,
-    arg_types=None,
-    quote_subname=True,
-):
+    target: AnyTarget,
+    grantee: str,
+    *,
+    grant_option: bool = False,
+    schema: Optional[str] = None,
+    arg_types: Optional[ArgTypesInput] = None,
+    quote_subname: bool = True,
+) -> Executable:
     """GRANT statement that may be executed by SQLAlchemy.
 
     Parameters:
@@ -219,16 +308,91 @@ def grant(
     )
 
 
+@overload
 def revoke(
-    privileges,
+    privileges: PrivilegesInput,
+    type: Literal[
+        PgObjectType.TABLE,
+        PgObjectType.SEQUENCE,
+        PgObjectType.LANGUAGE,
+        PgObjectType.SCHEMA,
+        PgObjectType.DATABASE,
+        PgObjectType.TABLESPACE,
+        PgObjectType.TYPE,
+        PgObjectType.FOREIGN_DATA_WRAPPER,
+        PgObjectType.FOREIGN_SERVER,
+        PgObjectType.FOREIGN_TABLE,
+        PgObjectType.LARGE_OBJECT,
+    ],
+    target: str,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: Optional[str] = ...,
+    arg_types: Optional[ArgTypesInput] = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    """This overload handles all cases where target and schema are strings
+    except functions (see arg_types).
+    """
+
+
+@overload
+def revoke(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.TABLE],
+    target: TableTarget,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: None = ...,
+    arg_types: None = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+@overload
+def revoke(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.SEQUENCE],
+    target: Sequence,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: None = ...,
+    arg_types: None = ...,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+@overload
+def revoke(
+    privileges: PrivilegesInput,
+    type: Literal[PgObjectType.FUNCTION],
+    target: str,
+    grantee: str,
+    *,
+    grant_option: bool = ...,
+    schema: Optional[str] = ...,
+    arg_types: ArgTypesInput,
+    quote_subname: bool = ...,
+) -> Executable:
+    ...
+
+
+def revoke(
+    privileges: PrivilegesInput,
     type: PgObjectType,
-    target,
-    grantee,
-    grant_option=False,
-    schema=None,
-    arg_types=None,
-    quote_subname=True,
-):
+    target: AnyTarget,
+    grantee: str,
+    *,
+    grant_option: bool = False,
+    schema: Optional[str] = None,
+    arg_types: Optional[ArgTypesInput] = None,
+    quote_subname: bool = True,
+) -> Executable:
     """REVOKE statement that may be executed by SQLAlchemy.
 
     Parameters:

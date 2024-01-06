@@ -6,7 +6,7 @@ from pg_grant.query import get_all_database_acls, get_database_acl
 expected_acls = {
     # postgres is owner, public get TEMPORARY and CONNECT,
     # alice was granted CONNECT
-    "db1": ["=Tc/postgres", "postgres=CTc/postgres", "alice=c*/postgres"],
+    "db1": ("=Tc/postgres", "postgres=CTc/postgres", "alice=c*/postgres"),
     # postgres has default privileges, so None is returned.
     "postgres": None,
 }

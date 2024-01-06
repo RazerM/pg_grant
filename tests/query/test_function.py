@@ -16,7 +16,7 @@ expected_acls = {
         # fun1 has default privileges, so None is returned.
         ("fun1", ("integer",)): None,
         # alice is owner, execute was revoked from public
-        ("fun1", ("text",)): ["alice=X/alice"],
+        ("fun1", ("text",)): ("alice=X/alice",),
         ("fun2", ()): None,
     },
 }
@@ -36,7 +36,7 @@ def test_get_function_acl_canonical_type(connection):
     f1 = get_function_acl(connection, "fun1", ("int4",), "public")
     f2 = get_function_acl(connection, "fun1", ("integer",), "public")
     assert f1 == f2
-    assert f1.arg_types == ["integer"]
+    assert f1.arg_types == ("integer",)
 
 
 @pytest.mark.parametrize(

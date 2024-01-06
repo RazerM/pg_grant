@@ -8,7 +8,7 @@ expected_acls = {
         # seq1 has default privileges, so None is returned.
         "seq1": None,
         # alice is owner, bob was granted all
-        "seq2": ["alice=rwU/alice", "bob=rwU/alice"],
+        "seq2": ("alice=rwU/alice", "bob=rwU/alice"),
     },
     "schema1": {
         "seq3": None,

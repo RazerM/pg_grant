@@ -2,9 +2,23 @@
 
 ## [Unreleased][unreleased]
 
+**This release supports SQLAlchemy 2.0 or later**
+
 ### Changed
 
 - Python 3.7 or later is required.
+- The following arguments for `grant` and `revoke` are now keyword-only:
+  - `grant_option`
+  - `schema`
+  - `arg_types`
+  - `quote_subname`
+- The following arguments for `as_grant_statements` and `as_revoke_statements`
+  are now keyword-only:
+  - `schema`
+  - `arg_types`
+  - `quote_subname`
+- The `type_` parameter for `as_grant_statements` and `as_revoke_statements` was
+  renamed to `type`.
 
 ### Removed
 

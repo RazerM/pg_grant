@@ -1,15 +1,19 @@
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import Column, Integer, MetaData, Sequence, Table, table
+from sqlalchemy import MetaData, Sequence, Table, table
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from pg_grant import PgObjectType, Privileges
 from pg_grant.sql import revoke
 
 meta = MetaData()
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 simple_table = table("users")
 simple_table_kw = table("user")
@@ -23,13 +27,13 @@ seq_schema = Sequence("user_id", schema="s")
 
 class ModelA(Base):
     __tablename__ = "user"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class ModelB(Base):
     __tablename__ = "users"
     __table_args__ = {"schema": "s"}
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 @pytest.mark.parametrize(
@@ -74,14 +78,16 @@ def test_compile_revoke_table_target(target, schema, compiled):
 
 
 @pytest.mark.parametrize(
-    "revoke_option, compiled",
+    "grant_option, compiled",
     [
         (True, "REVOKE GRANT OPTION FOR ALL ON TABLE t FROM alice"),
         (False, "REVOKE ALL ON TABLE t FROM alice"),
     ],
 )
-def test_compile_revoke_table_revoke_option(revoke_option, compiled):
-    statement = revoke(["ALL"], PgObjectType.TABLE, "t", "alice", revoke_option)
+def test_compile_revoke_table_grant_option(grant_option, compiled):
+    statement = revoke(
+        ["ALL"], PgObjectType.TABLE, "t", "alice", grant_option=grant_option
+    )
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -207,12 +213,14 @@ def test_compile_revoke_privs_invalid(privs):
     ],
 )
 def test_privileges_as_revoke_statements(grantee, privs, privswgo, type_, target, kw):
+    defaults = {"arg_types": None, "quote_subname": True, "schema": None}
+    kw = {**defaults, **kw}
     priv = Privileges(grantee, "bob", privs, privswgo)
 
     def fake_revoke(*args, **kwargs):
         return args, kwargs
 
-    patch_revoke = patch("pg_grant.sql.revoke", fake_revoke)
+    patch_revoke = patch("pg_grant.sql._Revoke", fake_revoke)
 
     with patch_revoke:
         r = priv.as_revoke_statements(type_, target, **kw)

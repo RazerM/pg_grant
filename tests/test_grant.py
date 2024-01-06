@@ -1,15 +1,19 @@
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import Column, Integer, MetaData, Sequence, Table, table
+from sqlalchemy import MetaData, Sequence, Table, table
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from pg_grant import PgObjectType, Privileges
 from pg_grant.sql import grant
 
 meta = MetaData()
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 simple_table = table("users")
 simple_table_kw = table("user")
@@ -23,13 +27,13 @@ seq_schema = Sequence("user_id", schema="s")
 
 class ModelA(Base):
     __tablename__ = "user"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class ModelB(Base):
     __tablename__ = "users"
     __table_args__ = {"schema": "s"}
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 @pytest.mark.parametrize(
@@ -81,7 +85,9 @@ def test_compile_grant_table_target(target, schema, compiled):
     ],
 )
 def test_compile_grant_table_grant_option(grant_option, compiled):
-    statement = grant(["ALL"], PgObjectType.TABLE, "t", "alice", grant_option)
+    statement = grant(
+        ["ALL"], PgObjectType.TABLE, "t", "alice", grant_option=grant_option
+    )
     assert str(statement.compile(dialect=postgresql.dialect())) == compiled
 
 
@@ -265,12 +271,14 @@ def test_compile_grant_function_privs_invalid():
     ],
 )
 def test_privileges_as_grant_statements(grantee, privs, privswgo, type_, target, kw):
+    defaults = {"arg_types": None, "quote_subname": True, "schema": None}
+    kw = {**defaults, **kw}
     priv = Privileges(grantee, "bob", privs, privswgo)
 
     def fake_grant(*args, **kwargs):
         return args, kwargs
 
-    patch_grant = patch("pg_grant.sql.grant", fake_grant)
+    patch_grant = patch("pg_grant.sql._Grant", fake_grant)
 
     with patch_grant:
         r = priv.as_grant_statements(type_, target, **kw)
