@@ -1,7 +1,7 @@
 version: "3"
 services:
   postgres:
-    image: postgres:14
+    image: postgres:16
     ports:
       - "127.0.0.1:5440:5432"
     environment:
