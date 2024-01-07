@@ -34,6 +34,12 @@ pep8test = ["flake8", "pep8-naming"]
 Documentation = "https://pg-grant.readthedocs.io"
 "Source Code" = "https://github.com/RazerM/pg_grant"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 addopts = "-r s"
 
